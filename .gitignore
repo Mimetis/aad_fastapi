@@ -1,0 +1,59 @@
+### Developer ###
+.vscode/
+.idea/
+local.env
+.env
+.DS_Store
+.deployment
+
+# a developer can copy his/her own files in a me/ folder without having them in git
+**/me/
+
+
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.whl
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyTest
+.pytest_cache/
+.coverage
+coverage.xml
+pytest-results.xml
+pytest-integration-results.xml
+pytest-e2e-results.xml
+
+# flask session folder
+flask_session/
+tests-report.md
+
+
+### Terraform/Terragrunt ###
+**/.terraform/
+**/.terraform.lock.hcl
+**/.terragrunt-cache/
+**/terraform.tfstate

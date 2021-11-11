@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.21.0/themes/prism.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" href="/">Playground</a>
+
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="{{ auth_url }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/logout">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            <form method="post">
+                <div class="text-center">
+                    <a class="btn btn-dark btn-sm" href="/userlogin">
+                        <i class="fas fa-reply"></i>
+                        Login using your Azure Ad Identity
+                    </a>
+                    <a class="btn btn-dark btn-sm" href="/mi">
+                        <i class="fas fa-reply"></i>
+                        Getting a token from the App Service Managed Identity
+                    </a>
+                    <a class="btn btn-dark btn-sm" href="/sp">
+                        <i class="fas fa-reply"></i>
+                        Getting a token from the App Service Principal
+                    </a>
+                </div>
+                <div class="text-center">
+                    <h2 class="display-4">Welcome&nbsp;{{ username }}!</h2>
+                    <p>
+                        <label>
+                            <span style="color:red">
+                                {{ exception_message }}
+                            </span>
+                        </label>
+                    </p>
+                    <p>
+                        <label>
+                            <span>
+                                {{ message }}
+                            </span>
+                        </label>
+                    </p>
+                </div>
+                <div class="form-group row" style="display:flex">
+                    <textarea style="flex:1" class="form-control" rows="10" id="txt_access_token"
+                        name="txt_access_token">{{ access_token }}</textarea>
+                </div>
+                <div class="form-group row">
+                    <div class="col-12">
+                        <a class="btn btn-outline-light2 btn-sm text-nowrap" data-toggle="collapse"
+                            href="#sourceCodeCollapse" role="button" aria-expanded="false"
+                            aria-controls="sourceCodeCollapse">
+                            <i class="fas fa-code"></i>
+                            Show Claims
+                        </a>
+                        <input type="hidden" value="{{ claims }}" id="json_claims" name="json_claims" />
+                        <div class="collapse" id="sourceCodeCollapse">
+                            <pre class='ml-3 mr-3 mt-3 btn-sm'
+                                style='background-color:white;white-space:pre-wrap;width:100%;height:100%;'><code id="sourceCode"></code></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-save"></i>
+                        Calling Web Api using Token from Text area
+                    </button>
+                    <a class="btn btn-dark btn-sm" href="/sendmail">
+                        <i class="fas fa-reply"></i>
+                        Sending an email
+                    </a>
+                </div>
+                <div class="col-12">
+                    <div>
+                        <input type="hidden" value="{{ data }}" id="json_data" name="json_data" />
+                        <pre class='ml-3 mr-3 mt-3 btn-sm'
+                            style='background-color:white;white-space:pre-wrap;width:100%;height:100%;'><code id="dataCode"></code></pre>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.21.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.21.0/components/prism-json.js"></script>
+
+    <script type="text/javascript">
+
+        let jsonObjectString = $("#json_claims").val();
+        let jsonDataObjectString = $("#json_data").val();
+
+        if (jsonObjectString && jsonObjectString.length) {
+
+            var o = JSON.parse(jsonObjectString);
+            let jsonString = Prism.highlight(JSON.stringify(o, null, 2), Prism.languages.json, 'json');
+
+            let $sourceCode = $("#sourceCode");
+            if ($sourceCode)
+                $sourceCode.html(jsonString);
+        }
+        if (jsonDataObjectString && jsonDataObjectString.length) {
+
+            var o = JSON.parse(jsonDataObjectString);
+            let jsonString = Prism.highlight(JSON.stringify(o, null, 2), Prism.languages.json, 'json');
+
+            this.$dataCode = $("#dataCode");
+            if ($dataCode)
+                $dataCode.html(jsonString);
+        }
+
+    </script>
+</body>
+
+</html>

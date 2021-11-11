@@ -1,0 +1,9 @@
+uvicorn==0.14.0
+python-dotenv==0.17.1
+Authlib==0.15.4
+msal==1.12.0
+azure-identity==1.6.0
+azure-keyvault==4.1.0
+azure-keyvault-certificates==4.2.1
+Flask==2.0.1
+flask-session==0.3.2
