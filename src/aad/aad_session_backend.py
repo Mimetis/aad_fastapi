@@ -4,7 +4,7 @@ from starlette.authentication import (
     UnauthenticatedUser,
 )
 
-from .aad_authentication_client import AadAuthenticationClient
+from .aad_client import AadClient
 
 
 class AadSessionBackend(AuthenticationBackend):
@@ -17,7 +17,7 @@ class AadSessionBackend(AuthenticationBackend):
             if not request.session or not request.session.get("aad_id"):
                 return AuthCredentials(None), UnauthenticatedUser()
 
-            aad_client = AadAuthenticationClient(session=request.session)
+            aad_client = AadClient(session=request.session)
 
             # Do not validate signature, since we may have here a
             # microsoft graph token, that we can't validate

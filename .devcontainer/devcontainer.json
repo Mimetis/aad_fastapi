@@ -8,6 +8,15 @@
 	"remoteEnv": {
 		"USERNAME": "john"
 	},
+	// ----------------------
+	// docker compose
+	// ----------------------
+	// "dockerComposeFile": "docker-compose.yml",
+	// "service": "aadv2",
+	// "context": ".",
+	// "workspaceFolder": "/workspaces/aadv2",
+	// docker single
+	// -----------------------
 	"build": {
 		"dockerfile": "Dockerfile",
 		// Update 'VARIANT' to pick an Ubuntu version: hirsute, focal, bionic
@@ -17,6 +26,11 @@
 			"USERNAME": "john"
 		}
 	},
+	"runArgs": [
+		"--env-file",
+		".devcontainer/devcontainer.env"
+	],
+	// -----------------------
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"editor.formatOnSave": true,
@@ -48,8 +62,5 @@
 	"mounts": [
 		"source=${localEnv:HOME}/.ssh,target=/home/john/.ssh,type=bind"
 	],
-	"runArgs": [
-		"--env-file",
-		".devcontainer/devcontainer.env"
-	]
+	"postStartCommand": "bash .devcontainer/azure.sh"
 }

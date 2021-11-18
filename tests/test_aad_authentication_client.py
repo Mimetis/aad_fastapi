@@ -7,10 +7,9 @@ from helpers import gen_payload
 from http_client import MinimalResponse
 
 from aad import (
-    AadAuthenticationClient,
+    AadClient,
     AuthError,
     AuthToken,
-    ScopeType,
     ensure_user_from_token,
 )
 
@@ -20,7 +19,7 @@ def test_aad_client_options_is_set():
 
     Ensures that options are set correctly
     """
-    aad_test = AadAuthenticationClient()
+    aad_test = AadClient()
     assert aad_test.options is not None
 
 
@@ -30,7 +29,7 @@ async def test_aad_client_options_is_not_set(client_credential):
 
     Ensures that options not set will fail correctly
     """
-    aad_client = AadAuthenticationClient(options={})
+    aad_client = AadClient(options={})
 
     with pytest.raises(Exception) as auth_error:
         await aad_client.build_msal_confidential_app(
@@ -50,7 +49,7 @@ async def test_construct_flow(client_credential):
     """
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     scopes_identifiers = aad_client.options.api_scopes_identifiers
     redirect_uri = "https://localhost/oauth-redirect.html"
@@ -78,7 +77,7 @@ async def test_acquire_token_by_auth_code_flow(client_credential):
     and get the session user filled with correct values
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -124,7 +123,7 @@ async def test_acquire_token_by_auth_code_flow_through_general_method(
     and get the session user filled with correct values
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -144,7 +143,6 @@ async def test_acquire_token_by_auth_code_flow_through_general_method(
         return MinimalResponse(status_code=200, text=payload)
 
     user = await aad_client.acquire_user_token(
-        ScopeType.WebApi,
         scopes_identifiers,
         auth_response=auth_response,  # fake auth response from flow
         flow=flow,  # correct flow from azure ad
@@ -169,7 +167,7 @@ async def test_acquire_token_by_auth_code_flow_with_roles(client_credential):
     Ensures that roles are correctly retrieved from token
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -218,7 +216,7 @@ async def test_acquire_token_by_auth_code_flow_with_scopes(client_credential):
     """
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
 
@@ -247,7 +245,7 @@ async def test_acquire_token_by_auth_code_flow_with_scopes(client_credential):
 
     assert user.scopes is not None
     assert len(user.scopes) == len(scopes_identifiers) + 1
-    for scope in aad_client.options.api_scopes:
+    for scope in aad_client.options.scopes_str:
         assert scope in user.scopes
 
 
@@ -259,7 +257,7 @@ async def test_acquire_token_by_auth_code_flow_with_scope(client_credential):
     Ensures that one scope is correctly retrieved from token (if only 1 scope)
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scope_identifier = aad_client.options.api_scopes_identifiers[0]
@@ -289,7 +287,7 @@ async def test_acquire_token_by_auth_code_flow_with_scope(client_credential):
 
     assert user.scopes is not None
     assert len(user.scopes) == 2
-    assert aad_client.options.api_scopes[0] in user.scopes
+    assert aad_client.options.scopes_str[0] in user.scopes
 
 
 @pytest.mark.asyncio
@@ -302,7 +300,7 @@ async def test_acquire_token_by_auth_code_flow_with_scope_then_acquire_on_behalf
     Ensures that one scope is correctly retrieved from token (if only 1 scope)
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scope_identifier = aad_client.options.api_scopes_identifiers[0]
@@ -361,7 +359,7 @@ async def test_acquire_token_by_auth_code_flow_with_wrong_public_key(client_cred
     Ensures that decoding the token with an incorrect public key will fail
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -396,76 +394,6 @@ async def test_acquire_token_by_auth_code_flow_with_wrong_public_key(client_cred
 
 
 @pytest.mark.asyncio
-async def test_acquire_token_for_service_principal(client_credential):
-    """Test case for aad_client.acquire_token using a service principal
-
-    Ensures that service principal can acquire a valid token and
-    get the session user filled with correct values
-    """
-    # azure aad client
-    aad_client = AadAuthenticationClient()
-
-    # build confidential app
-    scopes_identifiers = aad_client.options.api_scopes_identifiers_default
-
-    def mock_post(url, headers=None, *args, **kwargs):
-        payload = gen_payload(aad_client.options, client_credential.private_key, True)
-        return MinimalResponse(status_code=200, text=payload)
-
-    token = await aad_client._acquire_token_for_client(
-        scopes_identifiers,
-        post=mock_post,
-        public_key=client_credential.public_key,
-        client_credential=client_credential.__dict__,
-    )
-
-    assert token is not None
-    assert token.client_info is None
-    assert token.access_token is not None
-
-
-@pytest.mark.asyncio
-async def test_acquire_token_for_service_principal_through_general_method(
-    client_credential, monkeypatch: pytest.MonkeyPatch
-):
-    """Test case for aad_client.acquire_token using a service principal
-
-    Ensures that service principal can acquire a valid token and
-    get the session user filled with correct values
-    """
-    # azure aad client
-    aad_client = AadAuthenticationClient()
-
-    # build confidential app
-    scopes_identifiers = aad_client.options.api_scopes_identifiers_default
-
-    def mock_post(url, headers=None, *args, **kwargs):
-        payload = gen_payload(aad_client.options, client_credential.private_key, True)
-        return MinimalResponse(status_code=200, text=payload)
-
-    # def mock_get_token(self, scopes, **kwargs):
-    #     payload = gen_payload(aad_client.options, client_credential.private_key, True)
-    #     auth_token = json.loads(payload)
-    #     AccessToken = namedtuple("AccessToken", ["token", "expires_on"])
-    #     accessToken = AccessToken(token=auth_token["access_token"], expires_on=None)
-    #     return accessToken
-
-    # monkeypatch.setattr(ChainedTokenCredential, "get_token", mock_get_token)
-
-    user = await aad_client.acquire_user_token(
-        ScopeType.WebApi,
-        scopes=scopes_identifiers,
-        post=mock_post,
-        public_key=client_credential.public_key,
-        client_credential=client_credential.__dict__,
-    )
-
-    assert user is not None
-    assert user.auth_token is not None
-    assert user.auth_token.access_token is not None
-
-
-@pytest.mark.asyncio
 async def test_acquire_token_on_behalf_of(client_credential, private_key):
     """Test case for aad_client.acquire_token using a service principal
 
@@ -473,7 +401,7 @@ async def test_acquire_token_on_behalf_of(client_credential, private_key):
     get the session user filled with correct values
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     payload = gen_payload(aad_client.options, private_key)
     token = json.loads(payload)
@@ -506,7 +434,7 @@ async def test_acquire_token_on_behalf_of_through_general_method(
     get the session user filled with correct values
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     payload = gen_payload(aad_client.options, private_key, scp="bjiu-123")
     token = json.loads(payload)
@@ -520,7 +448,6 @@ async def test_acquire_token_on_behalf_of_through_general_method(
         return MinimalResponse(status_code=200, text=payload)
 
     user = await aad_client.acquire_user_token(
-        ScopeType.Graph,
         user=user,
         scopes=["User.Read"],
         post=mock_post,
@@ -534,37 +461,12 @@ async def test_acquire_token_on_behalf_of_through_general_method(
 
 
 @pytest.mark.asyncio
-async def test_acquire_token_for_graph_api(client_credential):
-    """Test case for aad_client.acquire_token using a service principal
-
-    Ensures that service principal can acquire a valid token and
-    get the session user filled with correct values
-    """
-    # azure aad client
-    aad_client = AadAuthenticationClient()
-
-    def mock_post(url, headers=None, *args, **kwargs):
-        payload = gen_payload(aad_client.options, client_credential.private_key, True)
-        return MinimalResponse(status_code=200, text=payload)
-
-    token = await aad_client._acquire_token_for_graph_api(
-        post=mock_post,
-        public_key=client_credential.public_key,
-        client_credential=client_credential.__dict__,
-    )
-
-    assert token is not None
-    assert token.client_info is None
-    assert token.access_token is not None
-
-
-@pytest.mark.asyncio
 async def test_acquire_token_for_managed_identity(
     client_credential, monkeypatch: pytest.MonkeyPatch
 ):
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     def mock_get_token(self, scopes, **kwargs):
         payload = gen_payload(aad_client.options, client_credential.private_key, True)
@@ -583,31 +485,6 @@ async def test_acquire_token_for_managed_identity(
 
 
 @pytest.mark.asyncio
-async def test_acquire_token_for_web_api(client_credential):
-    """Test case for aad_client.acquire_token using a service principal
-
-    Ensures that service principal can acquire a valid token and
-    get the session user filled with correct values
-    """
-    # azure aad client
-    aad_client = AadAuthenticationClient()
-
-    def mock_post(url, headers=None, *args, **kwargs):
-        payload = gen_payload(aad_client.options, client_credential.private_key, True)
-        return MinimalResponse(status_code=200, text=payload)
-
-    token = await aad_client._acquire_token_for_service_principal(
-        post=mock_post,
-        public_key=client_credential.public_key,
-        client_credential=client_credential.__dict__,
-    )
-
-    assert token is not None
-    assert token.client_info is None
-    assert token.access_token is not None
-
-
-@pytest.mark.asyncio
 async def test_acquire_token_from_cache(client_credential):
     """Test case for aad_client.acquire_token using a user credential
 
@@ -615,7 +492,7 @@ async def test_acquire_token_from_cache(client_credential):
     then acquiring this token from cache if valid
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -668,7 +545,7 @@ async def test_acquire_token_from_cache(client_credential):
 async def test_acquire_token_from_flow_works_without_session_set(client_credential):
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -705,7 +582,7 @@ async def test_acquire_token_from_flow_works_without_session_set(client_credenti
 @pytest.mark.asyncio
 async def test_build_msal_public():
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     msal_public = await aad_client.build_msal_public_app()
 
@@ -716,7 +593,7 @@ async def test_build_msal_public():
 async def test_get_client(client_credential):
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -757,7 +634,7 @@ async def test_get_client(client_credential):
 async def test_remove_account(client_credential):
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers

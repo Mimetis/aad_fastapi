@@ -77,10 +77,6 @@ def _decode_token(
     # If the token is coming from Graph, we can't validate the signature
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens#validating-tokens
     except jwt_errors.BadSignatureError as bse:
-        # decoded = decode_id_token(token)
-        # # this Guid is the Microsoft Graph audience identifier
-        # c = JWTClaims(decoded, None)
-        # return c
         raise AuthError(exception=bse)
     except AuthError as aex:
         raise aex

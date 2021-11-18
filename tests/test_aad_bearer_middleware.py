@@ -4,7 +4,7 @@ from http_client import MinimalResponse
 from requests.models import CaseInsensitiveDict
 from starlette.testclient import TestClient
 
-from aad import AadAuthenticationClient, AadBearerBackend, AadUser
+from aad import AadClient, AadBearerBackend, AadUser
 
 
 def test_aad_server_options_is_set():
@@ -40,7 +40,7 @@ async def test_user_is_authorized_from_authenticated_request(
     if authenticated with a user credential
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # get a confidential app
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -90,7 +90,7 @@ async def test_service_principal_is_authorized_from_authenticated_request(
     """
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build confidential app
     scopes_identifiers = aad_client.options.api_scopes_identifiers_default
@@ -135,7 +135,7 @@ async def test_service_principal_is_unauthorized_if_scopes_are_needed(
     """
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build confidential app
     scopes_identifiers = aad_client.options.api_scopes_identifiers_default
@@ -173,7 +173,7 @@ async def test_user_is_authorized_from_authenticated_request_with_scopes(
     """
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -211,9 +211,9 @@ async def test_user_is_authorized_from_authenticated_request_with_scopes(
 
     user = AadUser.create_user(**response.json())
     assert user.is_authenticated is True
-    assert len(user.scopes) == len(aad_client.options.api_scopes) + 1
+    assert len(user.scopes) == len(aad_client.options.scopes_str) + 1
     assert "authenticated" in user.scopes
-    for scope in aad_client.options.api_scopes:
+    for scope in aad_client.options.scopes_str:
         assert scope in user.scopes
 
 
@@ -230,7 +230,7 @@ async def test_user_is_unauthorized_from_authenticated_request_if_scopes_mismatc
     """
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     # fake scopes that should fail
@@ -285,7 +285,7 @@ async def test_user_is_authorized_from_authenticated_request_with_roles(
     """
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -349,7 +349,7 @@ async def test_user_is_unauthorized_from_authenticated_request_if_roles_mismatch
     """
 
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers
@@ -408,7 +408,7 @@ async def test_user_is_unauthorized_from_authenticated_request_if_no_roles(
     is not authorized to acces an api with scopes / roles specified
     """
     # azure aad client
-    aad_client = AadAuthenticationClient()
+    aad_client = AadClient()
 
     # build code flow
     scopes_identifiers = aad_client.options.api_scopes_identifiers

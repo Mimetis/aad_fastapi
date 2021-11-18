@@ -1,4 +1,5 @@
 from typing import List
+import typing
 from urllib.parse import urlparse
 
 import requests
@@ -16,26 +17,28 @@ class AzureAdSettings(BaseSettings):
     tenant_id       : Azure tenant id. (GUID)
     api_scopes      : API scopes list (separated by a blank space).
         ex:"user_impersonation"
-    graph_scopes    : GRAPH scopes list (separated by a blank space). ex:"User.Read"
     vault_url : vault url, containing the certificate to use.
         ex:"https://rgbertkvd10.vault.azure.net/"
     vault_certificate_name : certificate name, contained in vault. ex:"mycert"
 
     if not present, each value will be retrieved from environment variables:
     "CLIENT_ID", "AUTHORITY", "DOMAIN", "TENANT_ID", "API_SCOPES",
-    "GRAPH_SCOPES", "VAULT_URL", "VAULT_CERTIFICATE_NAME"
+    "VAULT_URL", "VAULT_CERTIFICATE_NAME"
 
     """
 
     client_id: str = Field(None, description="Client id", env="CLIENT_ID")
+    client_secret: str = Field(None, description="Client Secret", env="CLIENT_SECRET")
     authority: str = Field(None, description="login authority", env="AUTHORITY")
     domain: str = Field(None, description="Domain name", env="DOMAIN")
     tenant_id: str = Field(None, description="Tenant Id", env="TENANT_ID")
-    api_scopes_str: str = Field(None, description="API Scopes", env="API_SCOPES")
-    graph_scopes_str: str = Field(None, description="API Scopes", env="GRAPH_SCOPES")
-    vault_url: str = Field(None, description="Global Vault Url", env="VAULT_URL")
-    vault_certificate_name: str = Field(
-        None, description="Certificate name", env="VAULT_CERTIFICATE_NAME"
+    scopes_str: str = Field(None, description="Scopes", env="SCOPES")
+    vault_name: str = Field(None, description="Global Vault Url", env="VAULT_NAME")
+    vault_certificate_key: str = Field(
+        None, description="Certificate name", env="VAULT_CERTIFICATE_KEY"
+    )
+    vault_secret_key: str = Field(
+        None, description="Certificate name", env="VAULT_SECRET_KEY"
     )
     aad_issuers_list: List[str] = []
 
@@ -51,9 +54,9 @@ class AzureAdSettings(BaseSettings):
     def keys_url(self):
         return f"{self.authority}/discovery/v2.0/keys"
 
-    # @property
-    # def issuer(self):
-    #     return f"https://sts.windows.net/{self.tenant_id}/"
+    @property
+    def vault_url(self):
+        return f"https://{self.vault_name}.vault.azure.net"
 
     def get_available_issuers(self):
         if self.aad_issuers_list is not None and len(self.aad_issuers_list) > 0:
@@ -94,77 +97,57 @@ class AzureAdSettings(BaseSettings):
         ]
 
     @property
-    def graph_scopes(self):
-        if self.graph_scopes_str is None:
-            return None
+    def scopes(self):
 
-        return list(filter(None, self.graph_scopes_str.split(" ")))
+        _scopes = []
 
-    @property
-    def api_scopes(self):
-        if self.api_scopes_str is None:
-            return None
+        if self.scopes_str is not None:
+            if isinstance(self.scopes_str, typing.List):
+                _scopes.extend(self.scopes_str)
+            else:
+                for _scp in str.split(self.scopes_str, " "):
+                    _scopes.append(_scp)
 
-        return list(filter(None, self.api_scopes_str.split(" ")))
+        return _scopes
 
-    @property
-    def scopes_identifiers(self):
+    # @property
+    # def api_scopes_identifiers_root(self) -> List[str]:
+    #     if self.api_scopes is None:
+    #         return None
 
-        if self.api_scopes is None and self.graph_scopes is None:
-            return []
+    #     scopes_identifiers = []
+    #     for ls in self.api_scopes:
+    #         scopes_identifiers.append(f"https://{self.domain}/{self.client_id}")
 
-        _api_scopes = []
-        _graph_scopes = []
+    #     return scopes_identifiers
 
-        if self.api_scopes_identifiers is not None:
-            _api_scopes = self.api_scopes_identifiers
+    # @property
+    # def api_scopes_identifiers(self) -> List[str]:
+    #     if self.api_scopes is None:
+    #         return None
 
-        if self.graph_scopes is not None:
-            _graph_scopes = self.graph_scopes
+    #     scopes_identifiers = []
+    #     for ls in self.api_scopes:
+    #         scopes_identifiers.append(f"https://{self.domain}/{self.client_id}/{ls}")
 
-        # _graph_scopes.extend(_api_scopes)
-        # return _graph_scopes
-        _api_scopes.extend(_graph_scopes)
-        return _api_scopes
+    #     return scopes_identifiers
 
-    @property
-    def api_scopes_identifiers_root(self) -> List[str]:
-        if self.api_scopes is None:
-            return None
+    # @property
+    # def api_scopes_identifiers_default(self) -> List[str]:
+    #     if self.api_scopes is None:
+    #         return None
 
-        scopes_identifiers = []
-        for ls in self.api_scopes:
-            scopes_identifiers.append(f"https://{self.domain}/{self.client_id}")
+    #     scopes_identifiers = []
+    #     for ls in self.api_scopes:
+    #         scopes_identifiers.append(
+    #             f"https://{self.domain}/{self.client_id}/.default"
+    #         )
 
-        return scopes_identifiers
+    #     return scopes_identifiers
 
-    @property
-    def api_scopes_identifiers(self) -> List[str]:
-        if self.api_scopes is None:
-            return None
-
-        scopes_identifiers = []
-        for ls in self.api_scopes:
-            scopes_identifiers.append(f"https://{self.domain}/{self.client_id}/{ls}")
-
-        return scopes_identifiers
-
-    @property
-    def api_scopes_identifiers_default(self) -> List[str]:
-        if self.api_scopes is None:
-            return None
-
-        scopes_identifiers = []
-        for ls in self.api_scopes:
-            scopes_identifiers.append(
-                f"https://{self.domain}/{self.client_id}/.default"
-            )
-
-        return scopes_identifiers
-
-    @property
-    def graph_scopes_identifiers_default(self) -> List[str]:
-        return ["https://graph.microsoft.com/.default"]
+    # @property
+    # def graph_scopes_identifiers_default(self) -> List[str]:
+    #     return ["https://graph.microsoft.com/.default"]
 
     class Config:
         env_file = ".env"

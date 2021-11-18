@@ -3,7 +3,7 @@ ARG VARIANT=focal
 FROM mcr.microsoft.com/vscode/devcontainers/base:${VARIANT}
 
 # replace vscode user 
-ARG USERNAME=alex
+ARG USERNAME=john
 ARG VSC_CODE_NAME=vscode
 RUN usermod -m -d /home/$USERNAME $VSC_CODE_NAME
 RUN groupmod -n $USERNAME $VSC_CODE_NAME

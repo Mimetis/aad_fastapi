@@ -5,13 +5,11 @@ from os import environ
 
 import msal
 import requests
+from aad import AadClient, AuthError, AuthToken, ensure_user_from_token
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session  # https://pythonhosted.org/Flask-Session
 from werkzeug.middleware.proxy_fix import ProxyFix
-
-from aad import AadAuthenticationClient, AuthError, AuthToken, ensure_user_from_token
-from aad.aad_authentication_client import ScopeType
 
 app = Flask(__name__)
 app.config["SESSION_TYPE"] = "filesystem"
@@ -40,12 +38,12 @@ api_url = environ.get("API_URL")
 async def index():
     try:
 
-        aad_client = AadAuthenticationClient(session=session)
+        aad_client = AadClient(session=session)
 
         redirect_url = url_for("authorized", _external=True)
 
         flow = await aad_client.build_auth_code_flow(
-            aad_client.options.api_scopes_identifiers, redirect_url
+            aad_client.options.scopes, redirect_url
         )
 
         if request.method == "POST":
@@ -61,18 +59,10 @@ async def index():
         else:
             session["data"] = None
 
-        username = (
-            session["user"].name
-            if "user" in session and hasattr(session["user"], "name")
-            else ""
-        )
+        user = await aad_client.get_user()
 
-        claims = (
-            json.dumps(session["user"].claims)
-            if "user" in session and hasattr(session["user"], "claims")
-            else None
-        )
-
+        username = user.name if user is not None else ""
+        claims = json.dumps(user.claims) if user is not None else None
         message = session.get("message", "")
         access_token = session.get("access_token", "")
         data = json.dumps(session["data"]) if "data" in session else ""
@@ -100,88 +90,17 @@ async def index():
         )
 
 
-@app.route("/sp")
-async def sp_login():
-
-    try:
-        aad_client = AadAuthenticationClient(session=session)
-        token = await aad_client._acquire_token_for_service_principal()
-        user = ensure_user_from_token(token, False)
-        session["access_token"] = token.access_token
-        session["user"] = user
-        return redirect(url_for("index"))
-
-    except AuthError as aex:
-        return render_template(
-            "auth_error.html",
-            result={"error": aex.code, "error_description": aex.description},
-        )
-    except Exception as ex:
-        return render_template(
-            "auth_error.html",
-            result={"error": "Unknwon error", "error_description": ex.args[0]},
-        )
-
-
-@app.route("/mi")
-async def mi():
-    try:
-        aad_client = AadAuthenticationClient(session=session)
-        token = await aad_client._acquire_token_for_managed_identity()
-        user = ensure_user_from_token(token, False)
-        session["access_token"] = token.access_token
-        session["user"] = user
-        return redirect(url_for("index"))
-
-    except AuthError as aex:
-        return render_template(
-            "auth_error.html",
-            result={"error": aex.code, "error_description": aex.description},
-        )
-    except Exception as ex:
-        return render_template(
-            "auth_error.html",
-            result={"error": "Unknwon error", "error_description": ex.args[0]},
-        )
-
-
 @app.route("/userlogin")
 async def userlogin():
-    aad_client = AadAuthenticationClient(session=session)
+    aad_client = AadClient(session=session)
     redirect_url = url_for("authorized", _external=True)
 
     flow = await aad_client.build_auth_code_flow(
-        aad_client.options.api_scopes_identifiers, redirect_url
+        aad_client.options.scopes, redirect_url
     )
 
     auth_url = flow["auth_uri"]
     return redirect(auth_url)
-
-
-@app.route("/login")
-async def login():
-    try:
-
-        aad_client = AadAuthenticationClient(session=session)
-
-        redirect_url = url_for("authorized", _external=True)
-
-        flow = await aad_client.build_auth_code_flow(
-            aad_client.options.api_scopes_identifiers, redirect_url
-        )
-        return render_template(
-            "login.html", auth_url=flow["auth_uri"], version=msal.__version__
-        )
-    except AuthError as aex:
-        return render_template(
-            "auth_error.html",
-            result={"error": aex.code, "error_description": aex.description},
-        )
-    except Exception as ex:
-        return render_template(
-            "auth_error.html",
-            result={"error": "Unknwon error", "error_description": ex.args[0]},
-        )
 
 
 @app.route(
@@ -189,9 +108,9 @@ async def login():
 )  # Its absolute URL must match your app's redirect_uri set in AAD
 async def authorized():
     try:
-        aad_client = AadAuthenticationClient(session=session)
+        aad_client = AadClient(session=session)
         user = await aad_client._acquire_token_and_user_by_auth_code_flow(
-            aad_client.options.api_scopes_identifiers, request.args
+            aad_client.options.scopes, request.args
         )
 
         session["access_token"] = user.auth_token.access_token
@@ -218,7 +137,7 @@ async def authorized():
 @app.route("/logout")
 def logout():
     session.clear()  # Wipe out user and its token cache from session
-    aad_client = AadAuthenticationClient(session=session)
+    aad_client = AadClient(session=session)
     return redirect(
         aad_client.get_logout_uri(url_for("index", _external=True))
     )  # Also logout from your tenant's web session
@@ -228,8 +147,8 @@ def logout():
 async def apicall():
 
     try:
-        aad_client = AadAuthenticationClient(session=session)
-        token = await aad_client._acquire_token_for_service_principal()
+        aad_client = AadClient(session=session)
+        token = await aad_client.acquire_user_token()
 
     except AuthError:
         return redirect(url_for("login"))
@@ -262,12 +181,10 @@ async def api_call_graph_search():
         authToken = AuthToken(session["access_token"])
         user = ensure_user_from_token(auth_token=authToken, validate=False)
 
-        aad_client = AadAuthenticationClient()
+        aad_client = AadClient()
 
         # Get a new token on behalf of the user, with new scopes
-        authorized_graph_user = await aad_client.acquire_user_token(
-            ScopeType.Graph, user=user
-        )
+        authorized_graph_user = await aad_client.acquire_user_token(user, "User.Read")
 
         params = {
             "$count": "true",

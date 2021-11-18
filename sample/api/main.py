@@ -11,13 +11,12 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
 from aad import (
-    AadAuthenticationClient,
+    AadClient,
     AadBearerBackend,
     AadUser,
     authorize,
     oauth2_scheme,
 )
-from aad.aad_authentication_client import ScopeType
 
 dir = pathlib.Path(__file__).parent.parent.absolute()
 localenv = os.path.join(dir, "local.env")
@@ -94,12 +93,10 @@ async def user_from_graph(
 ):
 
     try:
-        aad_client = AadAuthenticationClient()
+        aad_client = AadClient()
 
         # Get a new token on behalf of the user, with new scopes
-        auth_token_obo = await aad_client.acquire_user_token(
-            ScopeType.Graph, request.user
-        )
+        auth_token_obo = await aad_client.acquire_user_token(request.user, "User.Read")
 
         headers = {"ConsistencyLevel": "eventual"}
 

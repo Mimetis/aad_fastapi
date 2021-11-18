@@ -1,7 +1,4 @@
-import base64
-import binascii
 import json
-from enum import Enum
 from typing import Dict, List, Optional, Union
 from uuid import uuid4
 
@@ -10,13 +7,8 @@ from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import (
     AzureCliCredential,
     ChainedTokenCredential,
-    DefaultAzureCredential,
     ManagedIdentityCredential,
 )
-from azure.keyvault.certificates import CertificateClient
-from azure.keyvault.secrets import SecretClient
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.serialization import pkcs12
 
 from .aad_autherror import AuthError
 from .aad_cache_manager import CacheManager
@@ -24,14 +16,10 @@ from .aad_helpers import ensure_user_from_token
 from .aad_options import AzureAdSettings
 from .aad_token import AuthToken
 from .aad_user import AadUser
+from .aad_vault import AadVault
 
 
-class ScopeType(Enum):
-    WebApi = "WebApi"
-    Graph = "Graph"
-
-
-class AadAuthenticationClient:
+class AadClient:
     def __init__(
         self,
         session: dict = None,
@@ -87,8 +75,10 @@ class AadAuthenticationClient:
 
         _ensure_options_property("client_id")
         _ensure_options_property("authority")
-        _ensure_options_property("vault_url")
-        _ensure_options_property("vault_certificate_name")
+
+        if not hasattr(self.options, "client_secret"):
+            _ensure_options_property("vault_name")
+            _ensure_options_property("vault_certificate_name")
 
     async def build_msal_public_app(self, **kwargs) -> msal.PublicClientApplication:
         self._ensure_options()
@@ -107,7 +97,7 @@ class AadAuthenticationClient:
             return None
 
         # extract token for web api scope only:
-        target = self.options.api_scopes_identifiers[0]
+        target = self.options.scopes[0]
 
         token_values = list(token.values())
         for tok in token_values:
@@ -155,7 +145,6 @@ class AadAuthenticationClient:
 
     async def acquire_user_token(
         self,
-        scopeType: ScopeType = ScopeType.WebApi,
         user: AadUser = None,
         scopes: Union[List[str], str] = None,
         **kwargs,
@@ -167,8 +156,9 @@ class AadAuthenticationClient:
             authentication_token: AuthToken = None
             exception: Exception = None
 
-            # We can't validate a graph token
-            validate = scopeType == ScopeType.WebApi
+            # Get scopes
+            scopes = self.options.scopes if scopes is None else scopes
+            scopes = scopes if isinstance(scopes, List) else [scopes]
 
             # ---------------------------------------------------
             # Case 0: Login fallback, only for login UI
@@ -179,32 +169,15 @@ class AadAuthenticationClient:
             flow = kwargs.pop("flow", None)
 
             # particular case on login identication
-            # Scopes can't be .default; so fallback on /client_id
-            # handle by sub method
             if auth_response is not None:
                 aad_user = await self._acquire_token_and_user_by_auth_code_flow(
-                    auth_response=auth_response, flow=flow, **kwargs
+                    scopes, auth_response=auth_response, flow=flow, **kwargs
                 )
                 return aad_user
 
             # try to get a valid user from cache
             if user is None:
                 user = await self.get_user(validate=False)
-
-            # First thing : Get token for web api:
-            if scopeType == ScopeType.WebApi:
-                scopes = (
-                    self.options.api_scopes_identifiers_default
-                    if scopes is None
-                    else scopes
-                )
-            else:
-                # defining scopes
-                scopes = (
-                    self.options.graph_scopes_identifiers_default
-                    if scopes is None
-                    else scopes
-                )
 
             # ---------------------------------------------------
             # Case 1: user is knwon
@@ -223,9 +196,8 @@ class AadAuthenticationClient:
 
             # ---------------------------------------------------
             # Case 2: Try Managed Identity first or Azure CLI
-            # Managed identity cannot have access to graph ?
             # ---------------------------------------------------
-            if authentication_token is None and scopeType == ScopeType.WebApi:
+            if authentication_token is None:
                 try:
                     authentication_token = (
                         await self._acquire_token_for_managed_identity(**kwargs)
@@ -251,7 +223,7 @@ class AadAuthenticationClient:
 
             # We can't validate the signature for Graph, since only Microsoft Graph can
             aad_user = ensure_user_from_token(
-                auth_token=authentication_token, validate=validate, **kwargs
+                auth_token=authentication_token, validate=True, **kwargs
             )
 
             return aad_user
@@ -262,7 +234,7 @@ class AadAuthenticationClient:
 
     async def _acquire_token_and_user_by_auth_code_flow(
         self,
-        scopes: Union[List[str], str] = None,
+        scopes: Union[List[str], str],
         auth_response=None,
         flow=None,
         **kwargs,
@@ -271,9 +243,7 @@ class AadAuthenticationClient:
             self._ensure_options()
 
             cache_session = await self.cache_manager.get(self.aad_id)
-            scopes = (
-                scopes if scopes is not None else self.options.api_scopes_identifiers
-            )
+
             scopes = scopes if isinstance(scopes, List) else [scopes]
 
             cca = await self.build_msal_confidential_app(**kwargs)
@@ -328,7 +298,7 @@ class AadAuthenticationClient:
         except Exception as ex:
             raise AuthError(exception=ex)
 
-    async def _acquire_token_for_managed_identity(self, **kwargs):
+    async def _acquire_token_for_managed_identity(self, scope: str, **kwargs):
         try:
             # Managed identity when deployed,
             managed_identity = ManagedIdentityCredential()
@@ -338,14 +308,16 @@ class AadAuthenticationClient:
 
             credential = ChainedTokenCredential(managed_identity, azure_cli)
 
-            resource = (
-                self.options.api_scopes_identifiers_root[0]
-                if self.options.api_scopes_identifiers_root is not None
-                and len(self.options.api_scopes_identifiers_root) >= 1
-                else None
-            )
+            # resource = (
+            #     self.options.api_scopes_identifiers_root[0]
+            #     if self.options.api_scopes_identifiers_root is not None
+            #     and len(self.options.api_scopes_identifiers_root) >= 1
+            #     else None
+            # )
 
-            access_token = credential.get_token(resource)
+            # access_token = credential.get_token(resource)
+
+            access_token = credential.get_token(scope)
 
             if access_token is None or access_token.token is None:
                 raise AuthError(
@@ -363,21 +335,9 @@ class AadAuthenticationClient:
         except Exception as ex:
             raise AuthError(exception=ex)
 
-    async def _acquire_token_for_service_principal(self, **kwargs):
-        """Acquire a tocken to access the Web API"""
-        return await self._acquire_token_for_client(
-            self.options.api_scopes_identifiers_default, **kwargs
-        )
-
-    async def _acquire_token_for_graph_api(self, **kwargs):
-        """Acquire a tocken to access the Microsoft Graph API"""
-        return await self._acquire_token_for_client(
-            self.options.graph_scopes_identifiers_default, **kwargs
-        )
-
     async def _acquire_token_for_client(
         self,
-        scopes: Union[List[str], str] = None,
+        scopes: Union[List[str], str],
         **kwargs,
     ):
         """Acquire a tocken to access a ressource from the application
@@ -389,12 +349,8 @@ class AadAuthenticationClient:
 
             cca = await self.build_msal_confidential_app(**kwargs)
 
-            scopes = (
-                self.options.api_scopes_identifiers_default
-                if scopes is None
-                else scopes
-            )
             scopes = scopes if isinstance(scopes, List) else [scopes]
+
             auth_token_from_cache = await self._get_token_from_cache(
                 cca, scopes, **kwargs
             )
@@ -431,7 +387,7 @@ class AadAuthenticationClient:
     async def _acquire_token_on_behalf_of(
         self,
         auth_token: AuthToken,
-        scopes: Union[List[str], str] = None,
+        scopes: Union[List[str], str],
         **kwargs,
     ):
         try:
@@ -489,80 +445,38 @@ class AadAuthenticationClient:
         try:
             self._ensure_options()
 
-            client_credential = kwargs.get("client_credential")
+            # get the client secret of any compatible client_credential from kwargs
+            client_credential = kwargs.get(
+                "client_credential", self.options.client_secret
+            )
 
+            # if no client secret, load a certificate
             if not client_credential:
 
                 cache_session = await self.cache_manager.get("azure_ad")
 
                 if cache_session is None or "certificate" not in cache_session:
-                    credential = DefaultAzureCredential()
 
-                    certificate_client = CertificateClient(
-                        vault_url=self.options.vault_url, credential=credential
-                    )
-                    secret_client = SecretClient(
-                        vault_url=self.options.vault_url, credential=credential
-                    )
-
-                    # Get the certificate secret that contains the private key
-                    certificate_secret = secret_client.get_secret(
-                        name=self.options.vault_certificate_name
-                    )
-
-                    # Get the certificate that contains the encoded thumbprint
-                    certificate = certificate_client.get_certificate(
-                        certificate_name=self.options.vault_certificate_name
-                    )
-
-                    # Get the hexadecimal thumbprint from X509 binary thumbprint value
-                    thumbprint = binascii.hexlify(
-                        certificate.properties.x509_thumbprint
+                    aadVault = AadVault(self.options.vault_url)
+                    certificate = await aadVault.get_certificate(
+                        self.options.vault_certificate_key
                     )
 
                     cache_session = await self.cache_manager.get("azure_ad")
-
-                    cache_session["certificate"] = {
-                        "private_key": certificate_secret.value,
-                        "thumbprint": thumbprint,
-                        "x_type": certificate_secret.properties._content_type,
-                    }
+                    cache_session["certificate"] = certificate
 
                     await self.cache_manager.set("azure_ad", cache_session)
 
                 # cache_session = self.cache_manager.read(self.aad_id)
                 cache_session = await self.cache_manager.get("azure_ad")
 
-                # get certificate type
-                thumbprint = cache_session["certificate"]["thumbprint"]
-                private_key = cache_session["certificate"]["private_key"]
-                content_type = cache_session["certificate"].get("x_type", "x-pem-file")
-
-                if "x-pem-file" in content_type:
-                    # Create the credential
-                    client_credential = {
-                        "thumbprint": thumbprint,
-                        "private_key": serialization.load_pem_private_key(
-                            private_key.encode(), password=None
-                        ),
-                    }
-                else:
-                    # Get the bytes from the base64 value
-                    cert_bytes = base64.b64decode(private_key)
-
-                    (
-                        private_key,
-                        public_certificate,
-                        additional_certificates,
-                    ) = pkcs12.load_key_and_certificates(data=cert_bytes, password=None)
-
-                    client_credential = {
-                        "thumbprint": thumbprint,
-                        "private_key": private_key,
-                    }
+                client_credential = aadVault.get_msal_client_credential(
+                    cache_session["certificate"]
+                )
 
             token_cache = await self._load_cache()
-            # Create teh msal app from that
+
+            # Create tha msal app from that
             return msal.ConfidentialClientApplication(
                 client_id=self.options.client_id,
                 authority=self.options.authority,
@@ -577,7 +491,7 @@ class AadAuthenticationClient:
 
     async def build_auth_code_flow(
         self,
-        scopes: Union[List[str], str] = None,
+        scopes: Union[List[str], str],
         redirect_uri=None,
         **kwargs,
     ):
@@ -617,7 +531,7 @@ class AadAuthenticationClient:
             raise AuthError(exception=ex)
 
     async def _get_token_from_cache(
-        self, cca: msal.ClientApplication, scopes: List[str] = None, **kwargs
+        self, cca: msal.ClientApplication, scopes: List[str], **kwargs
     ):
         accounts = cca.get_accounts()
         token = None

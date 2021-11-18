@@ -1,4 +1,4 @@
-from .aad_authentication_client import AadAuthenticationClient, ScopeType
+from .aad_client import AadClient
 from .aad_decorators import authorize, oauth2_scheme
 from .aad_autherror import AuthError
 from .aad_bearer_backend import AadBearerBackend
@@ -17,9 +17,8 @@ __all__ = [
     authorize,
     oauth2_scheme,
     ensure_user_from_token,
-    AadAuthenticationClient,
+    AadClient,
     AadUser,
-    ScopeType,
     AuthError,
     AuthToken,
     AadDiscoverKey,
