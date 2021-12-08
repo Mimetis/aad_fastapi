@@ -8,6 +8,7 @@ clean:
 	@rm -Rf src/aad/__pycache__/
 	@rm -Rf src/__pycache__/
 	@rm -Rf src/aad.egg-info
+	@rm -Rf src/flask_session
 
 format:
 	@isort .
