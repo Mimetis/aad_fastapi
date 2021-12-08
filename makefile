@@ -18,7 +18,7 @@ install-deps:
 	@PYTHONPATH=./src pip install -r ./tests/requirements.txt --quiet
 
 unit-test: clean install-deps
-	@PYTHONPATH=./src python3 -m pytest ./tests --doctest-modules --cov=./src --junitxml=pytest-results.xml --cov-report term --cov-report=xml
+	@PYTHONPATH=./src python3 -m pytest ./tests --doctest-modules 
 
 dist: clean install-deps
 	@PYTHONPATH=./src python3 -m setup bdist_wheel

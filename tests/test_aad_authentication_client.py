@@ -245,7 +245,7 @@ async def test_acquire_token_by_auth_code_flow_with_scopes(client_credential):
 
     assert user.scopes is not None
     assert len(user.scopes) == len(scopes_identifiers) + 1
-    for scope in aad_client.options.scopes_str:
+    for scope in aad_client.options.scopes:
         assert scope in user.scopes
 
 
@@ -287,7 +287,7 @@ async def test_acquire_token_by_auth_code_flow_with_scope(client_credential):
 
     assert user.scopes is not None
     assert len(user.scopes) == 2
-    assert aad_client.options.scopes_str[0] in user.scopes
+    assert aad_client.options.scopes[0] in user.scopes
 
 
 @pytest.mark.asyncio

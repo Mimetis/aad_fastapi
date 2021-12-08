@@ -64,8 +64,8 @@ def oauth2_scheme(options: AzureAdSettings = None, env_path: str = None, **kwarg
         options = AzureAdSettings(_env_file=env_path)
 
     scopes_dictionary = {}
-    if options.scopes_identifiers is not None:
-        for ls in options.scopes_identifiers:
+    if options.scopes_list is not None:
+        for ls in options.scopes_list:
             scopes_dictionary[ls] = ls
 
     return OAuth2(

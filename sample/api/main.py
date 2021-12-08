@@ -6,7 +6,8 @@ from typing import cast
 import requests
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
-from routers import engines, users
+from aad.aad_options import AzureAdSettings
+from routers import engines
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
@@ -23,30 +24,38 @@ localenv = os.path.join(dir, "local.env")
 if os.path.exists(localenv):
     load_dotenv(localenv, override=True)
 
-client_id = environ.get("CLIENT_ID")
+# App Registration settings for protecting all the APIs.
+api_options = AzureAdSettings()
+api_options.client_id = environ.get("API_CLIENT_ID")
+api_options.domain = environ.get("DOMAIN")
+api_options.scopes = environ.get("SCOPES")
+
+# App Registration setting for authentication SWAGGER WEB UI AUTHENTICATION.
+web_ui_client_id = environ.get("CLIENT_ID")  # Client ID
+web_ui_scopes = environ.get("SCOPES")  # Client ID
 
 # pre fill client id
 swagger_ui_init_oauth = {
     "usePkceWithAuthorizationCodeGrant": "true",
-    "clientId": client_id,
+    "clientId": web_ui_client_id,
     "appName": "B-ID",
+    "scopes": web_ui_scopes,
 }
 
 # Create a FasAPI instance
 app = FastAPI(swagger_ui_init_oauth=swagger_ui_init_oauth)
 
-# Add the bearer middleware
-app.add_middleware(AuthenticationMiddleware, backend=AadBearerBackend())
+# Add the bearer middleware, protected with Api App Registration
+app.add_middleware(AuthenticationMiddleware, backend=AadBearerBackend(api_options))
 
-
-# These routers needs an authentication for all its routes
-app.include_router(engines.router, dependencies=[Depends(oauth2_scheme())])
-app.include_router(users.router, dependencies=[Depends(oauth2_scheme())])
+# These routers needs an authentication for all its routes using Web App Registration
+app.include_router(
+    engines.router, dependencies=[Depends(oauth2_scheme(options=api_options))]
+)
 
 
 @app.get("/")
 async def hello_world():
-
     try:
         return {"hello": "world"}
     except Exception as ex:
@@ -54,7 +63,7 @@ async def hello_world():
 
 
 @app.get("/user")
-async def user(request: Request, token=Depends(oauth2_scheme())):
+async def user(request: Request, token=Depends(oauth2_scheme(options=api_options))):
 
     try:
         return request.user
@@ -64,7 +73,9 @@ async def user(request: Request, token=Depends(oauth2_scheme())):
 
 @app.get("/user_with_scope")
 @authorize("user_impersonation")
-async def user_with_scope(request: Request, token=Depends(oauth2_scheme())):
+async def user_with_scope(
+    request: Request, token=Depends(oauth2_scheme(options=api_options))
+):
 
     user = cast(AadUser, request.user)
 
@@ -76,51 +87,13 @@ async def user_with_scope(request: Request, token=Depends(oauth2_scheme())):
 
 @app.get("/user_with_scope_and_roles")
 @authorize("user_impersonation", "security-administrator")
-async def user_with_scope_and_roles(request: Request, token=Depends(oauth2_scheme())):
+async def user_with_scope_and_roles(
+    request: Request, token=Depends(oauth2_scheme(options=api_options))
+):
 
     user = cast(AadUser, request.user)
 
     try:
         return user
-    except Exception as ex:
-        return ex
-
-
-@app.get("/user_from_graph")
-@authorize("user_impersonation")
-async def user_from_graph(
-    request: Request, criteria: str = None, token=Depends(oauth2_scheme())
-):
-
-    try:
-        aad_client = AadClient()
-
-        # Get a new token on behalf of the user, with new scopes
-        auth_token_obo = await aad_client.acquire_user_token(request.user, "User.Read")
-
-        headers = {"ConsistencyLevel": "eventual"}
-
-        params = {
-            "$count": "true",
-            "$orderBy": "displayName",
-            "$top": "50",
-            "$search": f'"displayName:{criteria}" '
-            + f'OR "mail:{criteria}" '
-            + f'OR "userPrincipalName:{criteria}"',
-            "$select": "id,displayName,mail,companyName,department,jobTitle,givenName",
-        }
-
-        # We may want to use the graph package,
-        # but for understanding meaning, we stick with a simple request
-        response = requests.get(
-            "https://graph.microsoft.com/beta/users",
-            params=params,
-            auth=auth_token_obo,
-            headers=headers,
-        )
-
-        jsonvalue = response.json()
-
-        return jsonvalue
     except Exception as ex:
         return ex

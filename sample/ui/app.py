@@ -23,15 +23,12 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 client_id = os.environ["CLIENT_ID"]
 domain = os.environ["DOMAIN"]
+api_url = environ.get("API_URL")
 
 dir = pathlib.Path(__file__).parent.parent.absolute()
 localenv = os.path.join(dir, "local.env")
 if os.path.exists(localenv):
     load_dotenv(localenv, override=True)
-
-client_id = os.environ["CLIENT_ID"]
-domain = os.environ["DOMAIN"]
-api_url = environ.get("API_URL")
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -43,7 +40,7 @@ async def index():
         redirect_url = url_for("authorized", _external=True)
 
         flow = await aad_client.build_auth_code_flow(
-            aad_client.options.scopes, redirect_url
+            aad_client.options.scopes_list, redirect_url
         )
 
         if request.method == "POST":
@@ -54,8 +51,6 @@ async def index():
                 session["access_token"] = token
                 session["claims"] = user.claims
                 session["user"] = user.username
-            data = requests.get(f"{api_url}/engines", auth=auth_token).json()
-            session["data"] = data
         else:
             session["data"] = None
 
@@ -96,7 +91,7 @@ async def userlogin():
     redirect_url = url_for("authorized", _external=True)
 
     flow = await aad_client.build_auth_code_flow(
-        aad_client.options.scopes, redirect_url
+        aad_client.options.scopes_list, redirect_url
     )
 
     auth_url = flow["auth_uri"]
@@ -110,7 +105,7 @@ async def authorized():
     try:
         aad_client = AadClient(session=session)
         user = await aad_client._acquire_token_and_user_by_auth_code_flow(
-            aad_client.options.scopes, request.args
+            aad_client.options.scopes_list, request.args
         )
 
         session["access_token"] = user.auth_token.access_token
@@ -148,64 +143,14 @@ async def apicall():
 
     try:
         aad_client = AadClient(session=session)
-        token = await aad_client.acquire_user_token()
+        valid_user = await aad_client.acquire_user_token()
 
     except AuthError:
-        return redirect(url_for("login"))
+        return redirect(url_for("userlogin"))
 
-    graph_data = requests.get(
-        f"{api_url}/user_from_graph?criteria=heidi", auth=token
-    ).json()
-    return render_template("display.html", result=graph_data)
+    engines = requests.get(f"{api_url}/engines", auth=valid_user.auth_token).json()
 
-
-@app.route("/graph/me")
-def api_call_graph_me():
-
-    try:
-        authToken = AuthToken(session["access_token"])
-
-        graph_data = requests.get(f"{api_url}/users/me", auth=authToken).json()
-
-    except AuthError:
-        return redirect(url_for("login"))
-
-    return render_template("display.html", result=graph_data)
-
-
-@app.route("/graph/search")
-async def api_call_graph_search():
-
-    try:
-
-        authToken = AuthToken(session["access_token"])
-        user = ensure_user_from_token(auth_token=authToken, validate=False)
-
-        aad_client = AadClient()
-
-        # Get a new token on behalf of the user, with new scopes
-        authorized_graph_user = await aad_client.acquire_user_token(user, "User.Read")
-
-        params = {
-            "$count": "true",
-            "$top": "50",
-            "$orderBy": "displayName",
-            "$search": '"mail:spertus@microsoft.com"',
-        }
-
-        headers = {"ConsistencyLevel": "eventual"}
-
-        graph_data = requests.get(
-            "https://graph.microsoft.com/beta/users",
-            headers=headers,
-            params=params,
-            auth=authorized_graph_user.auth_token,
-        ).json()
-
-    except AuthError:
-        return redirect(url_for("login"))
-
-    return render_template("display.html", result=graph_data)
+    return render_template("display.html", result=engines)
 
 
 if __name__ == "__main__":

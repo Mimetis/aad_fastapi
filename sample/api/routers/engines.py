@@ -27,9 +27,3 @@ company = {
 @router.get("")
 async def get_engines(request: Request):
     return company
-
-
-# Always check scopes for API auth
-@router.get("/admin")
-async def get_engines_admin(request: Request):
-    return fake_items_db

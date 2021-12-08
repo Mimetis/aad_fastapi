@@ -211,9 +211,9 @@ async def test_user_is_authorized_from_authenticated_request_with_scopes(
 
     user = AadUser.create_user(**response.json())
     assert user.is_authenticated is True
-    assert len(user.scopes) == len(aad_client.options.scopes_str) + 1
+    assert len(user.scopes) == len(aad_client.options.scopes) + 1
     assert "authenticated" in user.scopes
-    for scope in aad_client.options.scopes_str:
+    for scope in aad_client.options.scopes:
         assert scope in user.scopes
 
 

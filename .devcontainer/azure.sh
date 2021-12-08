@@ -40,3 +40,4 @@ else
   sed "s,CLIENT_SECRET=[^;]*,export CLIENT_SECRET=$kv_secret," -i ~/.bashrc
 fi
 
+make install-deps

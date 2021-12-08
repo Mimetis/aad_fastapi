@@ -23,7 +23,7 @@ def test_oauth2_scheme_custom_options_is_set():
     """
     options = AzureAdSettings()
     options.authority = "https://login.microsoftonline.com/tenant_id"
-    options.api_scopes_str = "scope1 scope2"
+    options.scopes = "scope1 scope2"
     options.domain = "contoso.com"
     options.client_id = "A0A1A2-B0B1B2"
 

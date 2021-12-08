@@ -32,7 +32,7 @@ class AzureAdSettings(BaseSettings):
     authority: str = Field(None, description="login authority", env="AUTHORITY")
     domain: str = Field(None, description="Domain name", env="DOMAIN")
     tenant_id: str = Field(None, description="Tenant Id", env="TENANT_ID")
-    scopes_str: str = Field(None, description="Scopes", env="SCOPES")
+    scopes: str = Field(None, description="Scopes", env="SCOPES")
     vault_name: str = Field(None, description="Global Vault Url", env="VAULT_NAME")
     vault_certificate_key: str = Field(
         None, description="Certificate name", env="VAULT_CERTIFICATE_KEY"
@@ -97,15 +97,15 @@ class AzureAdSettings(BaseSettings):
         ]
 
     @property
-    def scopes(self):
+    def scopes_list(self):
 
         _scopes = []
 
-        if self.scopes_str is not None:
-            if isinstance(self.scopes_str, typing.List):
-                _scopes.extend(self.scopes_str)
+        if self.scopes is not None:
+            if isinstance(self.scopes, typing.List):
+                _scopes.extend(self.scopes)
             else:
-                for _scp in str.split(self.scopes_str, " "):
+                for _scp in str.split(self.scopes, " "):
                     _scopes.append(_scp)
 
         return _scopes

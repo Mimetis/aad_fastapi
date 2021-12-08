@@ -97,7 +97,7 @@ class AadClient:
             return None
 
         # extract token for web api scope only:
-        target = self.options.scopes[0]
+        target = self.options.scopes_list[0]
 
         token_values = list(token.values())
         for tok in token_values:
@@ -157,7 +157,7 @@ class AadClient:
             exception: Exception = None
 
             # Get scopes
-            scopes = self.options.scopes if scopes is None else scopes
+            scopes = self.options.scopes_list if scopes is None else scopes
             scopes = scopes if isinstance(scopes, List) else [scopes]
 
             # ---------------------------------------------------
