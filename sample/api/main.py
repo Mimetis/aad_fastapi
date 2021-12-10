@@ -2,8 +2,6 @@ import os
 import pathlib
 from os import environ
 from typing import cast
-
-import requests
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from aad.aad_options import AzureAdSettings
@@ -12,7 +10,6 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
 from aad import (
-    AadClient,
     AadBearerBackend,
     AadUser,
     authorize,
