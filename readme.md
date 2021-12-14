@@ -1,5 +1,61 @@
 # Protecting your FAST API web API with Azure AD
 
+This package allows you to protect easily your Web API, using Azure AD.
+
+It has been created specificaly for [FAST API](https://fastapi.tiangolo.com/), delivering a new [middleware](https://fastapi.tiangolo.com/tutorial/middleware/) in the pipeline to **authenticate** and **authorize** any http requests, if needed.
+
+Once configured in Azure AD (see sections below), just add an **authentication middleware** with the `AadBearerBackend`:
+
+``` python
+# pre fill client id
+swagger_ui_init_oauth = {
+    "usePkceWithAuthorizationCodeGrant": "true",
+    "clientId": web_ui_client_id,
+    "appName": "B-ID",
+    "scopes": web_ui_scopes,
+}
+
+# Create a FasAPI instance
+app = FastAPI(swagger_ui_init_oauth=swagger_ui_init_oauth)
+
+# Add the bearer middleware, protected with Api App Registration
+app.add_middleware(AuthenticationMiddleware, backend=AadBearerBackend(api_options))
+```
+
+Once configured, you can add [authentication dependency injection](https://fastapi.tiangolo.com/advanced/security/http-basic-auth) to your routers:
+
+``` python
+# These routers needs an authentication for all its routes using Web App Registration
+app.include_router(engines.router, dependencies=[Depends(oauth2_scheme(options=api_options))])
+```
+
+Or directly to your web api route:
+
+``` python
+@app.get("/user")
+async def user(request: Request, token=Depends(oauth2_scheme(options=api_options))):
+   return request.user
+```
+
+> if you are inspecting the `request.user` object, you will find all the user's property retrieved from **Azure AD**.
+
+You can specify **scopes** and / or **roles**, using **decorators**, to be checked before accessing your web api:
+
+``` python
+@app.get("/user_with_scope")
+@authorize("user_impersonation")
+async def user_with_scope(
+    request: Request, token=Depends(oauth2_scheme(options=api_options))
+):
+ # code here
+
+@app.get("/user_with_scope_and_roles")
+@authorize("user_impersonation", "admin-role")
+async def user_with_scope_and_roles(
+    request: Request, token=Depends(oauth2_scheme(options=api_options))
+):
+ # code here
+```
 
 
 ## Register your application within your Azure AD tenant
