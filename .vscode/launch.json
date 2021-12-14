@@ -45,13 +45,6 @@
         },
     ],
     "compounds": [
-        // {
-        //     "name": "AAD ALL",
-        //     "configurations": [
-        //         "AAD Flask",
-        //         "AAD FastAPI"
-        //     ]
-        // },
         {
             "name": "ALL",
             "configurations": [
