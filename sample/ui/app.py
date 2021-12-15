@@ -5,7 +5,7 @@ from os import environ
 
 import msal
 import requests
-from aad import AadClient, AuthError, AuthToken, ensure_user_from_token
+from aad_fastapi import AadClient, AuthError, AuthToken, ensure_user_from_token
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session  # https://pythonhosted.org/Flask-Session

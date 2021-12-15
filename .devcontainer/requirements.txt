@@ -12,3 +12,4 @@ flask-session==0.3.2
 uvicorn==0.14.0
 pytest
 pytest-asyncio
+twine

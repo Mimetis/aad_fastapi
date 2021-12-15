@@ -21,5 +21,8 @@ install-deps:
 unit-test: clean install-deps
 	@PYTHONPATH=./src python3 -m pytest ./tests --doctest-modules 
 
-dist: clean install-deps
-	@PYTHONPATH=./src python3 -m setup bdist_wheel
+dist: clean
+	@PYTHONPATH=./src python3 ./src/setup.py sdist
+
+pypi-upload:
+	@python3 -m twine upload ./dist/*

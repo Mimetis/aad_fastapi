@@ -4,9 +4,37 @@ This package allows you to protect easily your Web API, using Azure AD.
 
 It has been created specificaly for [FAST API](https://fastapi.tiangolo.com/), delivering a new [middleware](https://fastapi.tiangolo.com/tutorial/middleware/) in the pipeline to **authenticate** and **authorize** any http requests, if needed.
 
+## Installation
+
+To install with `pip`: 
+
+```bash
+/> python -m pip install aad_fastapi
+```
+
+## Usage
+
 Once configured in Azure AD (see sections below), just add an **authentication middleware** with the `AadBearerBackend`:
 
 ``` python
+from aad_fastapi import (
+    AadBearerBackend,
+    AadUser,
+    authorize,
+    oauth2_scheme,
+    AzureAdSettings
+)
+
+# App Registration settings for protecting all the APIs.
+api_options = AzureAdSettings()
+api_options.client_id = environ.get("API_CLIENT_ID")
+api_options.domain = environ.get("DOMAIN")
+api_options.scopes = environ.get("SCOPES")
+
+# App Registration setting for authentication SWAGGER WEB UI AUTHENTICATION.
+web_ui_client_id = environ.get("CLIENT_ID")  # Client ID
+web_ui_scopes = environ.get("SCOPES")  # Client ID
+
 # pre fill client id
 swagger_ui_init_oauth = {
     "usePkceWithAuthorizationCodeGrant": "true",
