@@ -4,16 +4,16 @@ from os import environ
 from typing import cast
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
-from aad.aad_options import AzureAdSettings
 from routers import engines
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
-from aad import (
+from aad_fastapi import (
     AadBearerBackend,
     AadUser,
     authorize,
     oauth2_scheme,
+    AzureAdSettings,
 )
 
 dir = pathlib.Path(__file__).parent.parent.absolute()
