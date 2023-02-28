@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+    name = "aad_fastapi"
+    version = "1.0.0"
+    description = "aad_fastapi middleware backend helper for bearer verification with FastAPI and Azure AD"
+    keywords = ["python"]
+    authors = [
+        { name="Sébastien Pertus", email="sebastien.pertus@gmail.com" },
+    ]
+    readme = "README.md"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ]
+    documentation = "https://mimetis.github.io/aad_fastapi"
+    dependencies = [
+        "Authlib==0.15.4",
+        "msal==1.12.0",
+        "azure-identity==1.6.0",
+        "azure-keyvault==4.1.0",
+        "azure-keyvault-certificates==4.2.1",
+        "fastapi==0.68.1",
+        "aiohttp==3.7.4",
+    ]
+
+[project.urls]
+"Homepage" = "https://github.com/Mimetis/aad_fastapi"
+"Bug Tracker" = "https://github.com/Mimetis/aad_fastapi/issues"
+"Documentation" = "https://mimetis.github.io/aad_fastapi"
