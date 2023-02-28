@@ -38,8 +38,7 @@ class AuthToken(AuthBase, BasicAuth):
             )
 
         if self.access_token.lower().startswith("bearer"):
-            _, self.access_token = get_authorization_scheme_param(
-                self.access_token)
+            _, self.access_token = get_authorization_scheme_param(self.access_token)
 
     # Used by BasicAuth
     def __new__(
