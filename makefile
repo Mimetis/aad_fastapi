@@ -25,10 +25,10 @@ dist: clean
 	@PYTHONPATH=./src python3 ./src/setup.py sdist
 
 build:
-	@python3 -m build
+	@python3 -m build src/
 
 pypi-upload-test:
-	@python3 -m twine upload --repository testpypi dist/*
+	@python3 -m twine upload --repository testpypi */dist/*
 
 pypi-upload:
-	@python3 -m twine upload dist/*
+	@python3 -m twine upload */dist/*
