@@ -4,7 +4,7 @@ from aiohttp.helpers import BasicAuth
 from fastapi.security.utils import get_authorization_scheme_param
 from requests.auth import AuthBase
 
-from aad.aad_autherror import AuthError
+from .aad_autherror import AuthError
 
 
 class AuthToken(AuthBase, BasicAuth):
@@ -38,7 +38,8 @@ class AuthToken(AuthBase, BasicAuth):
             )
 
         if self.access_token.lower().startswith("bearer"):
-            _, self.access_token = get_authorization_scheme_param(self.access_token)
+            _, self.access_token = get_authorization_scheme_param(
+                self.access_token)
 
     # Used by BasicAuth
     def __new__(
