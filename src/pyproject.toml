@@ -3,14 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-    name = "aad_fastapi"
+    name = "aad_fastapi-dlg"
     version = "1.0.0"
     description = "aad_fastapi middleware backend helper for bearer verification with FastAPI and Azure AD"
     keywords = ["python"]
     authors = [
         { name="Sébastien Pertus", email="sebastien.pertus@gmail.com" },
     ]
-    readme = "README.md"
+    readme = "../README.md"
     classifiers = [
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
