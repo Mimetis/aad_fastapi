@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-    name = "aad_fastapi-dlg"
+    name = "aad_fastapi"
     version = "1.0.0"
     description = "aad_fastapi middleware backend helper for bearer verification with FastAPI and Azure AD"
     keywords = ["python"]
