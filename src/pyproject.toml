@@ -26,6 +26,7 @@ build-backend = "hatchling.build"
         "fastapi==0.68.1",
         "aiohttp==3.7.4",
     ]
+    requires-python = ">=3.8"
 
 [project.urls]
 "Homepage" = "https://github.com/Mimetis/aad_fastapi"
