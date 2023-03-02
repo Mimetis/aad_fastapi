@@ -1,5 +1,5 @@
-from src.aad_fastapi import oauth2_scheme
-from src.aad_fastapi.aad_options import AzureAdSettings
+from aad_fastapi import oauth2_scheme
+from aad_fastapi.aad_options import AzureAdSettings
 
 
 def test_oauth2_scheme_options_is_set():

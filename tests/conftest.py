@@ -8,7 +8,7 @@ from fastapi.param_functions import Depends
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
-from src.aad_fastapi import AadBearerBackend, authorize, oauth2_scheme
+from aad_fastapi import AadBearerBackend, authorize, oauth2_scheme
 
 os.environ["CLIENT_ID"] = "01010101-aaaa-bbbb-acdf-020202020202"
 os.environ["TENANT_ID"] = "02020202-aaaa-erty-olki-020202020202"

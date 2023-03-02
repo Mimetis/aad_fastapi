@@ -5,7 +5,7 @@ from typing import List
 from authlib.common import encoding
 from authlib.jose import jwt
 
-from src.aad_fastapi.aad_options import AzureAdSettings
+from aad_fastapi.aad_options import AzureAdSettings
 
 
 def gen_client_info(options: AzureAdSettings, **kwargs):
