@@ -8,7 +8,7 @@ from fastapi import Depends, FastAPI
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
-from routers import engines
+from sample.api.routers import engines
 from src.aad_fastapi import (
     AadBearerBackend,
     AadUser,
