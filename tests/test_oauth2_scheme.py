@@ -39,7 +39,6 @@ def test_oauth2_scheme_custom_options_is_set():
         == "https://login.microsoftonline.com/tenant_id/oauth2/v2.0/authorize"
     )
     assert len(oauth2.model.flows.authorizationCode.scopes) == 2
-    print(oauth2.model.flows.authorizationCode.scopes)
     assert (
         list(oauth2.model.flows.authorizationCode.scopes)[0]
         == "scope1"
