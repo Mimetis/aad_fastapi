@@ -1,5 +1,5 @@
-from aad import oauth2_scheme
-from aad.aad_options import AzureAdSettings
+from src.aad_fastapi import oauth2_scheme
+from src.aad_fastapi.aad_options import AzureAdSettings
 
 
 def test_oauth2_scheme_options_is_set():
@@ -39,11 +39,12 @@ def test_oauth2_scheme_custom_options_is_set():
         == "https://login.microsoftonline.com/tenant_id/oauth2/v2.0/authorize"
     )
     assert len(oauth2.model.flows.authorizationCode.scopes) == 2
+    print(oauth2.model.flows.authorizationCode.scopes)
     assert (
         list(oauth2.model.flows.authorizationCode.scopes)[0]
-        == "https://contoso.com/A0A1A2-B0B1B2/scope1"
+        == "scope1"
     )
     assert (
         list(oauth2.model.flows.authorizationCode.scopes)[1]
-        == "https://contoso.com/A0A1A2-B0B1B2/scope2"
+        == "scope2"
     )

@@ -4,8 +4,8 @@ import pytest
 from authlib.jose.rfc7519.claims import JWTClaims
 from helpers import gen_payload
 
-from aad import AadUser, AuthError, AzureAdSettings
-from aad.aad_helpers import _decode_token, _get_user_from_claims, _validate_claims
+from src.aad_fastapi import AadUser, AuthError, AzureAdSettings
+from src.aad_fastapi.aad_helpers import _decode_token, _get_user_from_claims, _validate_claims
 
 
 def test_decode_token(private_key, public_key):

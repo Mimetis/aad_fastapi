@@ -2,13 +2,14 @@ import os
 import pathlib
 from os import environ
 from typing import cast
+
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
-from routers import engines
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
-from aad_fastapi import (
+from routers import engines
+from src.aad_fastapi import (
     AadBearerBackend,
     AadUser,
     authorize,
@@ -23,12 +24,12 @@ if os.path.exists(localenv):
 
 # App Registration settings for protecting all the APIs.
 api_options = AzureAdSettings()
-api_options.client_id = environ.get("API_CLIENT_ID")
+api_options.client_id = environ.get("APP_CLIENT_ID")
 api_options.domain = environ.get("DOMAIN")
 api_options.scopes = environ.get("SCOPES")
 
 # App Registration setting for authentication SWAGGER WEB UI AUTHENTICATION.
-web_ui_client_id = environ.get("CLIENT_ID")  # Client ID
+web_ui_client_id = environ.get("OPENAPI_CLIENT_ID")  # Client ID
 web_ui_scopes = environ.get("SCOPES")  # Client ID
 
 # pre fill client id
@@ -61,7 +62,6 @@ async def hello_world():
 
 @app.get("/user")
 async def user(request: Request, token=Depends(oauth2_scheme(options=api_options))):
-
     try:
         return request.user
     except Exception as ex:
@@ -69,11 +69,10 @@ async def user(request: Request, token=Depends(oauth2_scheme(options=api_options
 
 
 @app.get("/user_with_scope")
-@authorize("user_impersonation")
+@authorize("MyScope")
 async def user_with_scope(
-    request: Request, token=Depends(oauth2_scheme(options=api_options))
+        request: Request, token=Depends(oauth2_scheme(options=api_options))
 ):
-
     user = cast(AadUser, request.user)
 
     try:
@@ -83,14 +82,19 @@ async def user_with_scope(
 
 
 @app.get("/user_with_scope_and_roles")
-@authorize("user_impersonation", "security-administrator")
+@authorize(scopes="MyScope", roles="Chemist")
 async def user_with_scope_and_roles(
-    request: Request, token=Depends(oauth2_scheme(options=api_options))
+        request: Request, token=Depends(oauth2_scheme(options=api_options))
 ):
-
     user = cast(AadUser, request.user)
 
     try:
         return user
     except Exception as ex:
         return ex
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="localhost", port=8000)

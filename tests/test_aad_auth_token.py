@@ -5,7 +5,7 @@ import requests
 from helpers import gen_payload
 from requests.models import Response
 
-from aad import AadDiscoverKey, AuthError, AuthToken, AzureAdSettings
+from src.aad_fastapi import AadDiscoverKey, AuthError, AuthToken, AzureAdSettings
 
 
 def test_discover_keys(monkeypatch: pytest.MonkeyPatch):
