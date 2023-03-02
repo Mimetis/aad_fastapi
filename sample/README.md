@@ -59,31 +59,23 @@ API_URL = "http://localhost:8000"
 
 ## Launching from bash
 
-First of all, be sure to execute the commands from the `/src/aad/sample` directory.
+First of all, be sure to execute the commands from the root directory.
 
 Install the python modules required
 
 ``` bash
-pip install -r requirements.txt
+pip install -r /sample/requirements.txt
 ```
 
-You can launch both the web api and the web ui using these commands:
+You can launch web api directly from IDE, or using the command line:
 
 ``` bash
-export PYTHONPATH=../src &&  python3 -m uvicorn --app-dir ./api  main:app --host localhost --port 8000 --reload
+python -m sample.api.main
 ```
-
-![API command line](api-command-line.png)
-
-``` bash
-export PYTHONPATH=../src && export FLASK_APP=./ui/app.py && python3 -m flask run --host localhost --port 5000
-```
-
-![WEB UI command line](web-command-line.png)
 
 ## Launching from Visual Studio Code
 
-You can debug the **API** and the **WEB UI** at the same time, using a **compounds launch** system, from within **VS CODE**:
+You can debug the **API** , using the following launch configuration, from within **VS CODE**:
 
 Create a `//.vscode/launch.json` file with this content:
 
@@ -94,24 +86,6 @@ Create a `//.vscode/launch.json` file with this content:
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "aad test Flask",
-            "type": "python",
-            "request": "launch",
-            "module": "flask",
-            "env": {
-                "PYTHONPATH": "src/aad/sample/ui",
-                "FLASK_APP": "src/aad/sample/ui/app.py",
-                "FLASK_ENV": "development"
-            },
-            "args": [
-                "run",
-                "--host",
-                "localhost",
-                "--no-debugger"
-            ],
-            "jinja": true
-        },
         {
             "name": "add test FastAPI",
             "type": "python",
@@ -150,13 +124,3 @@ Create a `//.vscode/launch.json` file with this content:
 Once launched, you can access the **Web API docs** page using the uri: [http://localhost:8000/docs](http://localhost:8000/docs).
 
 From this docs page, you can execute any web api, after log in, using the **Authorize** button
-
-## Exploring Web UI
-
-Be sure to have the Web API project launched, to be able to get responses to your requests from the Web UI to the Web API
-
-Once launched, you can access the Web UI page using the uri [http://localhost:5000](http://localhost:5000).
-
-From that point, you can:
-- Log In.
-- Call the Web API, using your personal token, and get a response.

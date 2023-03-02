@@ -1,6 +1,6 @@
 import typing
 
-from authlib.jose import errors as jwt_errors
+from authlib.jose import errors as jwt_errors, JsonWebKey
 from authlib.jose import jwk, jwt
 from authlib.jose.rfc7519.claims import JWTClaims
 from authlib.jose.util import extract_header
@@ -68,7 +68,7 @@ def _decode_token(
             # get signing keys, to be able to decode token
             for key in jwks["keys"]:
                 if key["kid"] == unverified_header["kid"]:
-                    jwkey = jwk.loads(key)
+                    jwkey = JsonWebKey.import_key(key)
 
         claims = jwt.decode(token, jwkey)
 

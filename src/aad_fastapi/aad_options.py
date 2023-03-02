@@ -1,5 +1,5 @@
-from typing import List
 import typing
+from typing import List
 from urllib.parse import urlparse
 
 import requests
@@ -34,12 +34,8 @@ class AzureAdSettings(BaseSettings):
     tenant_id: str = Field(None, description="Tenant Id", env="TENANT_ID")
     scopes: str = Field(None, description="Scopes", env="SCOPES")
     vault_name: str = Field(None, description="Global Vault Url", env="VAULT_NAME")
-    vault_certificate_key: str = Field(
-        None, description="Certificate name", env="VAULT_CERTIFICATE_KEY"
-    )
-    vault_secret_key: str = Field(
-        None, description="Certificate name", env="VAULT_SECRET_KEY"
-    )
+    vault_certificate_key: str = Field(None, description="Certificate name", env="VAULT_CERTIFICATE_KEY")
+    vault_secret_key: str = Field(None, description="Certificate name", env="VAULT_SECRET_KEY")
     aad_issuers_list: List[str] = []
 
     @property
@@ -63,10 +59,10 @@ class AzureAdSettings(BaseSettings):
             return self.aad_issuers_list
 
         issuers_list_url = (
-            "https://login.microsoftonline.com/common/discovery/instance"
-            + "?authorization_endpoint="
-            + "https://login.microsoftonline.com/common/oauth2/v2.0/"
-            + "authorize&api-version=1.1"
+                "https://login.microsoftonline.com/common/discovery/instance"
+                + "?authorization_endpoint="
+                + "https://login.microsoftonline.com/common/oauth2/v2.0/"
+                + "authorize&api-version=1.1"
         )
 
         _issuers_list = requests.get(issuers_list_url).json()
@@ -79,9 +75,7 @@ class AzureAdSettings(BaseSettings):
             if _authority_domain in _metadata["preferred_network"]:
                 for alias in _metadata["aliases"]:
                     self.aad_issuers_list.append(f"https://{alias}/{self.tenant_id}/")
-                    self.aad_issuers_list.append(
-                        f"https://{alias}/{self.tenant_id}/v2.0"
-                    )
+                    self.aad_issuers_list.append(f"https://{alias}/{self.tenant_id}/v2.0")
 
         return self.aad_issuers_list
 
@@ -109,45 +103,6 @@ class AzureAdSettings(BaseSettings):
                     _scopes.append(_scp)
 
         return _scopes
-
-    # @property
-    # def api_scopes_identifiers_root(self) -> List[str]:
-    #     if self.api_scopes is None:
-    #         return None
-
-    #     scopes_identifiers = []
-    #     for ls in self.api_scopes:
-    #         scopes_identifiers.append(f"https://{self.domain}/{self.client_id}")
-
-    #     return scopes_identifiers
-
-    # @property
-    # def api_scopes_identifiers(self) -> List[str]:
-    #     if self.api_scopes is None:
-    #         return None
-
-    #     scopes_identifiers = []
-    #     for ls in self.api_scopes:
-    #         scopes_identifiers.append(f"https://{self.domain}/{self.client_id}/{ls}")
-
-    #     return scopes_identifiers
-
-    # @property
-    # def api_scopes_identifiers_default(self) -> List[str]:
-    #     if self.api_scopes is None:
-    #         return None
-
-    #     scopes_identifiers = []
-    #     for ls in self.api_scopes:
-    #         scopes_identifiers.append(
-    #             f"https://{self.domain}/{self.client_id}/.default"
-    #         )
-
-    #     return scopes_identifiers
-
-    # @property
-    # def graph_scopes_identifiers_default(self) -> List[str]:
-    #     return ["https://graph.microsoft.com/.default"]
 
     class Config:
         env_file = ".env"

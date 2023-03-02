@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from aad import CacheManager
+from aad_fastapi import CacheManager
 
 
 @pytest.mark.asyncio

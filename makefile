@@ -16,6 +16,7 @@ format:
 
 install-deps:
 	@PYTHONPATH=./src pip install -r ./src/requirements.txt --quiet
+	@PYTHONPATH=./src pip install -r ./sample/requirements.txt --quiet
 	@PYTHONPATH=./src pip install -r ./tests/requirements.txt --quiet
 
 unit-test: clean install-deps

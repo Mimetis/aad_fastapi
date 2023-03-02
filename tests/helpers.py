@@ -5,7 +5,7 @@ from typing import List
 from authlib.common import encoding
 from authlib.jose import jwt
 
-from aad.aad_options import AzureAdSettings
+from aad_fastapi.aad_options import AzureAdSettings
 
 
 def gen_client_info(options: AzureAdSettings, **kwargs):
@@ -36,7 +36,8 @@ def gen_access_token(
     now = datetime.now()
     iat = kwargs.pop("iat", int(datetime.timestamp(now)))
     nbf = kwargs.pop("nbf", iat)
-    exp = kwargs.pop("exp", int(datetime.timestamp(now + timedelta(minutes=60))))
+    exp = kwargs.pop("exp", int(
+        datetime.timestamp(now + timedelta(minutes=60))))
 
     # identifier
     oid = kwargs.pop("oid", "jdoe1")
@@ -92,7 +93,8 @@ def gen_access_token(
         if roles is not None:
             payload["roles"] = roles
 
-    header = {"alg": "RS256", "typ": "JWT", "kid": "nOo3ZDrODXEK1jKWhXslHR_KXEg"}
+    header = {"alg": "RS256", "typ": "JWT",
+              "kid": "nOo3ZDrODXEK1jKWhXslHR_KXEg"}
 
     dump_bytes = jwt.encode(header, payload, private_key)
 

@@ -2,12 +2,13 @@ import os
 import pathlib
 from os import environ
 from typing import cast
+
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
-from routers import engines
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
+from sample.api.routers import engines
 from aad_fastapi import (
     AadBearerBackend,
     AadUser,
@@ -61,7 +62,6 @@ async def hello_world():
 
 @app.get("/user")
 async def user(request: Request, token=Depends(oauth2_scheme(options=api_options))):
-
     try:
         return request.user
     except Exception as ex:
@@ -71,9 +71,8 @@ async def user(request: Request, token=Depends(oauth2_scheme(options=api_options
 @app.get("/user_with_scope")
 @authorize("user_impersonation")
 async def user_with_scope(
-    request: Request, token=Depends(oauth2_scheme(options=api_options))
+        request: Request, token=Depends(oauth2_scheme(options=api_options))
 ):
-
     user = cast(AadUser, request.user)
 
     try:
@@ -83,14 +82,19 @@ async def user_with_scope(
 
 
 @app.get("/user_with_scope_and_roles")
-@authorize("user_impersonation", "security-administrator")
+@authorize(scopes="user_impersonation", roles="security-administrator")
 async def user_with_scope_and_roles(
-    request: Request, token=Depends(oauth2_scheme(options=api_options))
+        request: Request, token=Depends(oauth2_scheme(options=api_options))
 ):
-
     user = cast(AadUser, request.user)
 
     try:
         return user
     except Exception as ex:
         return ex
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="localhost", port=8000)
