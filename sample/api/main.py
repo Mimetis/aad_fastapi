@@ -9,7 +9,7 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
 from sample.api.routers import engines
-from src.aad_fastapi import (
+from aad_fastapi import (
     AadBearerBackend,
     AadUser,
     authorize,
