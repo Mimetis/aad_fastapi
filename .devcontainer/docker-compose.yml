@@ -1,0 +1,15 @@
+version: '3'
+services:
+  aadv2:
+    dns:
+      - 1.1.1.1
+    env_file: ./devcontainer.env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - "..:/workspaces/aadv2"
+      # - "~/.ssh:/home/alex/.ssh"
+    ports:
+      - "127.0.0.1:8008:8008"
+    command: sleep infinity
