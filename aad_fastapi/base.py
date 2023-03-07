@@ -1,0 +1,1 @@
+NAME = "aad_fastapi"

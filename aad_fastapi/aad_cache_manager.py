@@ -1,16 +1,15 @@
 import time
 from asyncio import Lock, create_task, sleep
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 
 class CacheManager:
-    cache_db: Dict[any, any] = dict()
+    cache_db: Dict[Any, Any] = dict()
     _lock = Lock()
 
     @classmethod
     async def set(cls, key: str, value: Dict[str, any]) -> None:
         async with cls._lock:
-
             if "__expires_at__" not in value:
                 expires_in = 86400
                 expires_at = time.time() + expires_in
@@ -29,7 +28,7 @@ class CacheManager:
             cls.cache_db.pop(key, None)
 
     @classmethod
-    async def clear(cls) -> int:
+    async def clear(cls) -> None:
         async with cls._lock:
             cls.cache_db.clear()
 

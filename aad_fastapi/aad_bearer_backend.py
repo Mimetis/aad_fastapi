@@ -5,6 +5,7 @@ from starlette.authentication import (
     AuthenticationError,
 )
 from starlette.requests import Request
+from typing import Optional
 
 from .aad_autherror import AuthError
 from .aad_helpers import _validate_claims, ensure_user_from_token
@@ -13,12 +14,12 @@ from .aad_token import AuthToken
 
 
 class AadBearerBackend(AuthenticationBackend):
-
     # static json, containing discovery urls
     _discovery_keys = None
 
-    def __init__(self, options: AzureAdSettings = None, env_path: str = None, **kwargs):
-
+    def __init__(
+        self, options: AzureAdSettings = None, env_path: Optional[str] = None, **kwargs
+    ):
         if options is None:
             options = AzureAdSettings(_env_file=env_path)
 
@@ -65,7 +66,8 @@ class AadBearerBackend(AuthenticationBackend):
         # If not bearer, return None
         if not authorization:
             raise AuthError(
-                "authorization_header_missing", "Authorization header is expected"
+                "authorization_header_missing",
+                "Authorization header is expected",
             )
 
         # get schema from header

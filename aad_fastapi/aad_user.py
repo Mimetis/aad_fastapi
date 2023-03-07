@@ -9,7 +9,6 @@ from .aad_token import AuthToken
 class AadUser(SimpleUser):
     @staticmethod
     def create_user(**kwargs):
-
         user = AadUser(kwargs["username"])
 
         for key, value in kwargs.items():
@@ -20,7 +19,7 @@ class AadUser(SimpleUser):
     id: Optional[str] = None
     name: Optional[str] = None
     email: Optional[str] = None
-    username: str = None
+    username: Optional[str] = None
     auth_token: Optional[AuthToken] = None
     roles_id: Optional[List[str]] = None
     groups: Optional[List[str]] = None

@@ -9,7 +9,6 @@ from aad_fastapi import AadDiscoverKey, AuthError, AuthToken, AzureAdSettings
 
 
 def test_discover_keys(monkeypatch: pytest.MonkeyPatch):
-
     keys = {
         "keys": [
             {
