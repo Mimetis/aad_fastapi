@@ -7,7 +7,6 @@ from aad_fastapi import CacheManager
 
 @pytest.mark.asyncio
 async def test_aad_cache_manager_set():
-
     await CacheManager.clear()
     key = "a"
     value = {"key": "value"}
@@ -20,7 +19,6 @@ async def test_aad_cache_manager_set():
 
 @pytest.mark.asyncio
 async def test_aad_cache_manager_expiracy():
-
     await CacheManager.clear()
     key = "a"
     value = {"key": "value"}
@@ -33,7 +31,6 @@ async def test_aad_cache_manager_expiracy():
 
 @pytest.mark.asyncio
 async def test_aad_cache_manager_remove():
-
     await CacheManager.clear()
     key = "a"
     value = {"key": "value"}
@@ -46,7 +43,6 @@ async def test_aad_cache_manager_remove():
 
 @pytest.mark.asyncio
 async def test_aad_cache_manager_clear():
-
     await CacheManager.clear()
     key = "a"
     value = {"key": "value"}
@@ -61,7 +57,6 @@ async def test_aad_cache_manager_clear():
 
 @pytest.mark.asyncio
 async def test_aad_cache_manager_check_expiracy():
-
     await CacheManager.clear()
     key = "a"
     value = {"key": "value"}

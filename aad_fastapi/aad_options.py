@@ -34,8 +34,12 @@ class AzureAdSettings(BaseSettings):
     tenant_id: str = Field(None, description="Tenant Id", env="TENANT_ID")
     scopes: str = Field(None, description="Scopes", env="SCOPES")
     vault_name: str = Field(None, description="Global Vault Url", env="VAULT_NAME")
-    vault_certificate_key: str = Field(None, description="Certificate name", env="VAULT_CERTIFICATE_KEY")
-    vault_secret_key: str = Field(None, description="Certificate name", env="VAULT_SECRET_KEY")
+    vault_certificate_key: str = Field(
+        None, description="Certificate name", env="VAULT_CERTIFICATE_KEY"
+    )
+    vault_secret_key: str = Field(
+        None, description="Certificate name", env="VAULT_SECRET_KEY"
+    )
     aad_issuers_list: List[str] = []
 
     @property
@@ -59,10 +63,10 @@ class AzureAdSettings(BaseSettings):
             return self.aad_issuers_list
 
         issuers_list_url = (
-                "https://login.microsoftonline.com/common/discovery/instance"
-                + "?authorization_endpoint="
-                + "https://login.microsoftonline.com/common/oauth2/v2.0/"
-                + "authorize&api-version=1.1"
+            "https://login.microsoftonline.com/common/discovery/instance"
+            + "?authorization_endpoint="
+            + "https://login.microsoftonline.com/common/oauth2/v2.0/"
+            + "authorize&api-version=1.1"
         )
 
         _issuers_list = requests.get(issuers_list_url).json()
@@ -92,7 +96,6 @@ class AzureAdSettings(BaseSettings):
 
     @property
     def scopes_list(self):
-
         _scopes = []
 
         if self.scopes is not None:

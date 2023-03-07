@@ -9,7 +9,7 @@ It has been created specificaly for [FAST API](https://fastapi.tiangolo.com/), d
 To install with `pip`: 
 
 ```bash
-/> python -m pip install aad_fastapi
+> python -m pip install aad_fastapi
 ```
 
 ## Usage

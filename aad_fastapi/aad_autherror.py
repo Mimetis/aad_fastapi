@@ -1,14 +1,16 @@
+from typing import Optional
+
+
 class AuthError(Exception):
     code: str
 
     def __init__(
         self,
-        code: str = None,
-        description: str = None,
+        code: Optional[str] = None,
+        description: Optional[str] = None,
         status_code=401,
-        exception: Exception = None,
+        exception: Optional[Exception] = None,
     ):
-
         if exception is not None and code is None:
             if hasattr(exception, "error"):
                 code = exception.error

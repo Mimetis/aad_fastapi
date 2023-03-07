@@ -1,5 +1,6 @@
 import os
 import pathlib
+import sys
 
 import pytest
 from async_asgi_testclient import TestClient
@@ -17,6 +18,18 @@ os.environ["API_SCOPES"] = "user_impersonation"
 os.environ["AUTHORITY"] = "https://login.microsoftonline.com/common"
 os.environ["VAULT_URL"] = "https://your_key_vault_name.vault.azure.net/"
 os.environ["VAULT_CERTIFICATE_NAME"] = "certificate_name_from_your_key_vault"
+
+
+# each test runs on cwd to its temp dir
+@pytest.fixture(autouse=True)
+def go_to_tmpdir(request):
+    # Get the fixture dynamically by its name.
+    tmpdir = request.getfixturevalue("tmpdir")
+    # ensure local test created packages can be imported
+    sys.path.insert(0, str(tmpdir))
+    # Chdir only for the duration of the test.
+    with tmpdir.as_cwd():
+        yield
 
 
 @pytest.fixture(scope="module")
@@ -47,7 +60,6 @@ def client_credential(private_key, public_key, thumbprint):
 
 @pytest.fixture(scope="module")
 def cert():
-
     # Get certificate private and public keys to create access_token
     aad_tests_dir = pathlib.Path(__file__).parent.absolute()
 
@@ -62,7 +74,6 @@ def cert():
 
 @pytest.fixture(scope="module")
 def client(public_key):
-
     # pre fill client id
     swagger_ui_init_oauth = {
         "clientId": os.environ.get("CLIENT_ID"),

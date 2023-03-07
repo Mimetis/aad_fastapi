@@ -11,7 +11,11 @@ class MinimalHttpClient:
     def post(self, url, params=None, data=None, headers=None, **kwargs):
         return MinimalResponse(
             requests_resp=self.session.post(
-                url, params=params, data=data, headers=headers, timeout=self.timeout
+                url,
+                params=params,
+                data=data,
+                headers=headers,
+                timeout=self.timeout,
             )
         )
 

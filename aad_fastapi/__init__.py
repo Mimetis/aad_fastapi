@@ -1,7 +1,7 @@
-from .aad_decorators import authorize, oauth2_scheme
 from .aad_autherror import AuthError
 from .aad_bearer_backend import AadBearerBackend
 from .aad_cache_manager import CacheManager
+from .aad_decorators import authorize, oauth2_scheme
 from .aad_discover_keys import AadDiscoverKey
 from .aad_helpers import ensure_user_from_token
 from .aad_options import AzureAdSettings

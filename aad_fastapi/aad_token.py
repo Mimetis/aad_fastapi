@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from aiohttp.helpers import BasicAuth
 from fastapi.security.utils import get_authorization_scheme_param
@@ -10,13 +10,12 @@ from .aad_autherror import AuthError
 class AuthToken(AuthBase, BasicAuth):
     def __init__(
         self,
-        access_token: str = None,
-        id_token: str = None,
-        refresh_token: str = None,
-        client_info: str = None,
-        token: Dict[str, str] = None,
+        access_token: Optional[str] = None,
+        id_token: Optional[str] = None,
+        refresh_token: Optional[str] = None,
+        client_info: Optional[str] = None,
+        token: Optional[Dict[str, str]] = None,
     ):
-
         self.access_token = access_token
         self.id_token = id_token
         self.client_info = client_info
@@ -34,7 +33,8 @@ class AuthToken(AuthBase, BasicAuth):
 
         if self.access_token is None:
             raise AuthError(
-                "access_token_empty", "No access token in the BearerAuth instance"
+                "access_token_empty",
+                "No access token in the BearerAuth instance",
             )
 
         if self.access_token.lower().startswith("bearer"):

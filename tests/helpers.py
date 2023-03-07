@@ -25,7 +25,10 @@ def gen_client_info(options: AzureAdSettings, **kwargs):
 
 
 def gen_access_token(
-    options: AzureAdSettings, private_key: str, use_service_principal=False, **kwargs
+    options: AzureAdSettings,
+    private_key: str,
+    use_service_principal=False,
+    **kwargs,
 ):
     """
     Generate a fake token to ensure the validation is correctly done on server side
@@ -36,8 +39,7 @@ def gen_access_token(
     now = datetime.now()
     iat = kwargs.pop("iat", int(datetime.timestamp(now)))
     nbf = kwargs.pop("nbf", iat)
-    exp = kwargs.pop("exp", int(
-        datetime.timestamp(now + timedelta(minutes=60))))
+    exp = kwargs.pop("exp", int(datetime.timestamp(now + timedelta(minutes=60))))
 
     # identifier
     oid = kwargs.pop("oid", "jdoe1")
@@ -93,8 +95,11 @@ def gen_access_token(
         if roles is not None:
             payload["roles"] = roles
 
-    header = {"alg": "RS256", "typ": "JWT",
-              "kid": "nOo3ZDrODXEK1jKWhXslHR_KXEg"}
+    header = {
+        "alg": "RS256",
+        "typ": "JWT",
+        "kid": "nOo3ZDrODXEK1jKWhXslHR_KXEg",
+    }
 
     dump_bytes = jwt.encode(header, payload, private_key)
 
@@ -102,7 +107,10 @@ def gen_access_token(
 
 
 def gen_payload(
-    options: AzureAdSettings, private_key: str, use_service_principal=False, **kwargs
+    options: AzureAdSettings,
+    private_key: str,
+    use_service_principal=False,
+    **kwargs,
 ):
     """Generate a fake payload with an access_token and client_info if
     user credentials"""

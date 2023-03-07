@@ -1,10 +1,11 @@
 import typing
-
-from authlib.jose import errors as jwt_errors, JsonWebKey
-from authlib.jose import jwk, jwt
+from authlib.jose import JsonWebKey
+from authlib.jose import errors as jwt_errors
+from authlib.jose import jwt
 from authlib.jose.rfc7519.claims import JWTClaims
 from authlib.jose.util import extract_header
 from msal.oauth2cli.oidc import decode_id_token
+from typing import Optional
 
 from .aad_autherror import AuthError
 from .aad_discover_keys import AadDiscoverKey
@@ -16,7 +17,6 @@ from .aad_user import AadUser
 def _decode_token_without_validating_signature(
     auth_token: typing.Union[AuthToken, str]
 ) -> JWTClaims:
-
     auth_token = AuthToken(auth_token) if isinstance(auth_token, str) else auth_token
 
     token = auth_token.access_token
@@ -30,10 +30,9 @@ def _decode_token_without_validating_signature(
 def _decode_token(
     auth_token: typing.Union[AuthToken, str], keys_url=None, **kwargs
 ) -> JWTClaims:
-    """Decode an access token using a public key or a key to retrieve the public key"""
+    """Decode an access token using public key or key to retrieve the public key"""
 
     try:
-
         public_key = kwargs.pop("public_key", None)
 
         if keys_url is None and public_key is None:
@@ -45,9 +44,7 @@ def _decode_token(
 
         jwkey = None
 
-        auth_token = (
-            AuthToken(auth_token) if isinstance(auth_token, str) else auth_token
-        )
+        auth_token = AuthToken(auth_token) if isinstance(auth_token, str) else auth_token
 
         # if id token exists, gets it
         # in that cicumstances, we are sure we can validate the token
@@ -131,10 +128,9 @@ def ensure_user_from_token(
     auth_token: AuthToken,
     validate: bool = True,
     options: AzureAdSettings = None,
-    env_path: str = None,
+    env_path: Optional[str] = None,
     **kwargs,
 ):
-
     if options is None:
         options = AzureAdSettings(_env_file=env_path)
 
