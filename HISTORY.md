@@ -5,14 +5,11 @@ Changelog
 (unreleased)
 ------------
 - Release: version 1.0.3 🚀 [Dor Lugasi-Gal]
+- Release: version 1.0.3 🚀 [Dor Lugasi-Gal]
 - Merge branch 'master' of https://github.com/Mimetis/aad_fastapi. [Dor
   Lugasi-Gal]
 - Update release.yml. [Dor Lugasi-Gal]
 - Release: version 1.0.3 🚀 [Dor Lugasi-Gal]
-
-
-1.0.3 (2023-03-08)
-------------------
 - Release: version 1.0.3 🚀 [Dor Lugasi-Gal]
 - Upload to codecov only once. [Dor Lugasi-Gal]
 - Trigger on master andadd versions to python version matrix. [Dor
