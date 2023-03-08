@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+(unreleased)
+------------
+- Merge branch 'master' of https://github.com/Mimetis/aad_fastapi. [Dor
+  Lugasi-Gal]
+- Update release.yml. [Dor Lugasi-Gal]
+- Release: version 1.0.3 🚀 [Dor Lugasi-Gal]
+
+
 1.0.3 (2023-03-08)
 ------------------
 - Release: version 1.0.3 🚀 [Dor Lugasi-Gal]
