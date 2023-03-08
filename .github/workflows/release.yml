@@ -21,6 +21,7 @@ jobs:
           fetch-depth: 0
       - name: Generate Changelog
         run: | 
+          chmod +x .github/release_message.sh
           .github/release_message.sh > release_message.md
           cat release_message.md
       - name: Release
