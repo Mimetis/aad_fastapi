@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives.serialization import pkcs12
 
 
 class AadVault:
+    """ Azure Key Vault client """
     def __init__(self, vault_url: str):
         self.vault_url = vault_url
 
@@ -35,7 +36,6 @@ class AadVault:
             "thumbprint": thumbprint,
             "x_type": certificate_secret.properties._content_type,
         }
-
         return certificate
 
     def get_secret(self, vault_secret_key: str):
@@ -47,7 +47,8 @@ class AadVault:
 
         return secret.value
 
-    def get_msal_client_credential(self, certificate: Dict):
+    @staticmethod
+    def get_msal_client_credential(certificate: Dict):
         # get certificate type
         thumbprint = certificate["thumbprint"]
         private_key = certificate["private_key"]

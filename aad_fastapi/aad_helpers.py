@@ -7,7 +7,7 @@ from authlib.jose.util import extract_header
 from msal.oauth2cli.oidc import decode_id_token
 from typing import Optional
 
-from .aad_autherror import AuthError
+from .aad_auth_error import AuthError
 from .aad_discover_keys import AadDiscoverKey
 from .aad_options import AzureAdSettings
 from .aad_token import AuthToken
