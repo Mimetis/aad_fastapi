@@ -4,7 +4,6 @@ from aad_fastapi.aad_options import AzureAdSettings
 
 def test_oauth2_scheme_options_is_set():
     oauth2 = oauth2_scheme()
-
     assert_oauth_scheme(oauth2)
 
 
@@ -16,8 +15,8 @@ def test_oauth2_scheme_custom_options_is_set():
     options.client_id = "A0A1A2-B0B1B2"
 
     oauth2 = oauth2_scheme(options=options)
-
     assert_oauth_scheme(oauth2)
+
     assert (
         oauth2.model.flows.authorizationCode.authorizationUrl
         == "https://login.microsoftonline.com/tenant_id/oauth2/v2.0/authorize"
