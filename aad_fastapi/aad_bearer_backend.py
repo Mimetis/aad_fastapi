@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.authentication import (
     AuthCredentials,
@@ -5,7 +7,6 @@ from starlette.authentication import (
     AuthenticationError,
 )
 from starlette.requests import Request
-from typing import Optional
 
 from .aad_auth_error import AuthError
 from .aad_helpers import _validate_claims, ensure_user_from_token

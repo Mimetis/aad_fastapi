@@ -40,7 +40,9 @@ def private_key(cert):
 
 @pytest.fixture(scope="module")
 def cert():
-    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048, backend=default_backend())
+    private_key = rsa.generate_private_key(
+        public_exponent=65537, key_size=2048, backend=default_backend()
+    )
     public_key = private_key.public_key()
 
     return {"public_key": public_key, "private_key": private_key}
@@ -71,14 +73,14 @@ def client(public_key):
     @app.get("/isauth_impersonation")
     @authorize("user_impersonation")
     async def get_isauth_with_impersonation(
-            request: Request, token=Depends(oauth2_scheme())
+        request: Request, token=Depends(oauth2_scheme())
     ):
         return request.user
 
     @app.get("/isauth_impersonation_roles")
     @authorize("user_impersonation", ["Admin", "Contributor"])
     async def get_isauth_with_impersonation_and_roles(
-            request: Request, token=Depends(oauth2_scheme())
+        request: Request, token=Depends(oauth2_scheme())
     ):
         return request.user
 

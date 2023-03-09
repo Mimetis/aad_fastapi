@@ -6,13 +6,12 @@ class AuthError(Exception):
     description: str
 
     def __init__(
-            self,
-            code: Optional[str] = None,
-            description: Optional[str] = None,
-            status_code=401,
-            exception: Optional[Exception] = None,
+        self,
+        code: Optional[str] = None,
+        description: Optional[str] = None,
+        status_code=401,
+        exception: Optional[Exception] = None,
     ):
-
         self.populate_code(code, exception)
         self.populate_description(description, exception)
         super().__init__(self.description)

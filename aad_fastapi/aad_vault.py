@@ -10,7 +10,8 @@ from cryptography.hazmat.primitives.serialization import pkcs12
 
 
 class AadVault:
-    """ Azure Key Vault client """
+    """Azure Key Vault client"""
+
     def __init__(self, vault_url: str):
         self.vault_url = vault_url
 
