@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.authentication import (
     AuthCredentials,
@@ -5,16 +7,14 @@ from starlette.authentication import (
     AuthenticationError,
 )
 from starlette.requests import Request
-from typing import Optional
 
-from .aad_autherror import AuthError
+from .aad_auth_error import AuthError
 from .aad_helpers import _validate_claims, ensure_user_from_token
 from .aad_options import AzureAdSettings
 from .aad_token import AuthToken
 
 
 class AadBearerBackend(AuthenticationBackend):
-    # static json, containing discovery urls
     _discovery_keys = None
 
     def __init__(

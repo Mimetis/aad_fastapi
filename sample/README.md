@@ -93,7 +93,6 @@ Create a `//.vscode/launch.json` file with this content:
             "module": "uvicorn",
             "env": {
                 "PYTHONPATH": "src/aad/sample/api",
-                "FLASK_ENV": "development"
             },               
             "args": [
                 "main:app",
@@ -111,7 +110,6 @@ Create a `//.vscode/launch.json` file with this content:
         {
             "name": "Full",
             "configurations": [
-                "aad test Flask",
                 "add test FastAPI"
             ]
         }
