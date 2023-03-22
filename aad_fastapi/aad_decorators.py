@@ -1,12 +1,13 @@
 import inspect
 import typing
+from functools import wraps
+from typing import Optional
+
 from fastapi.openapi.models import OAuthFlowAuthorizationCode, OAuthFlows
 from fastapi.security import OAuth2
-from functools import wraps
 from starlette.authentication import requires
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
-from typing import Optional
 
 from .aad_options import AzureAdSettings
 from .aad_user import AadUser

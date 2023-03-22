@@ -1,11 +1,12 @@
 import typing
+from typing import Optional
+
 from authlib.jose import JsonWebKey
 from authlib.jose import errors as jwt_errors
 from authlib.jose import jwt
 from authlib.jose.rfc7519.claims import JWTClaims
 from authlib.jose.util import extract_header
 from msal.oauth2cli.oidc import decode_id_token
-from typing import Optional
 
 from .aad_autherror import AuthError
 from .aad_discover_keys import AadDiscoverKey
