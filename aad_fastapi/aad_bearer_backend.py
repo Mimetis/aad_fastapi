@@ -43,7 +43,9 @@ class AadBearerBackend(AuthenticationBackend):
             auth_token = self.get_token_from_header(request)
 
             # decode token
-            user = ensure_user_from_token(auth_token, public_key=self.public_key)
+            user = ensure_user_from_token(
+                auth_token, public_key=self.public_key, options=self.options
+            )
 
             # validate the claims
             _validate_claims(
