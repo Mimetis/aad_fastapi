@@ -4,7 +4,7 @@ from aiohttp.helpers import BasicAuth
 from fastapi.security.utils import get_authorization_scheme_param
 from requests.auth import AuthBase
 
-from .aad_autherror import AuthError
+from .aad_auth_error import AuthError
 
 
 class AuthToken(AuthBase, BasicAuth):
@@ -22,14 +22,10 @@ class AuthToken(AuthBase, BasicAuth):
         self.refresh_token = refresh_token
 
         if token:
-            if "access_token" in token:
-                self.access_token = token["access_token"]
-            if "id_token" in token:
-                self.id_token = token["id_token"]
-            if "client_info" in token:
-                self.client_info = token["client_info"]
-            if "refresh_token" in token:
-                self.refresh_token = token["refresh_token"]
+            self.access_token = token.get("access_token", None)
+            self.id_token = token.get("id_token", None)
+            self.client_info = token.get("client_info", None)
+            self.refresh_token = token.get("refresh_token", None)
 
         if self.access_token is None:
             raise AuthError(

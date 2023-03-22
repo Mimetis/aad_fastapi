@@ -5,32 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "UI",
-            "type": "python",
-            "request": "launch",
-            "module": "flask",
-            "env": {
-                "PYTHONPATH": "sample/ui",
-                "FLASK_APP": "sample/ui/app.py",
-                "FLASK_ENV": "development"
-            },
-            "args": [
-                "run",
-                "--eager-loading",
-                "--host",
-                "localhost"
-            ],
-            "jinja": true,
-            "justMyCode": false
-        },
-        {
             "name": "API",
             "type": "python",
             "request": "launch",
             "module": "uvicorn",
             "env": {
                 "PYTHONPATH": "sample/api",
-                "FLASK_ENV": "development"
             },
             "args": [
                 "main:app",
@@ -49,7 +29,6 @@
             "name": "ALL",
             "configurations": [
                 "API",
-                "UI"
             ]
         },
     ]

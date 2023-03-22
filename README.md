@@ -2,7 +2,7 @@
 
 This package allows you to protect easily your Web API, using Azure AD.
 
-It has been created specificaly for [FAST API](https://fastapi.tiangolo.com/), delivering a new [middleware](https://fastapi.tiangolo.com/tutorial/middleware/) in the pipeline to **authenticate** and **authorize** any http requests, if needed.
+It has been created specifically for [FAST API](https://fastapi.tiangolo.com/), delivering a new [middleware](https://fastapi.tiangolo.com/tutorial/middleware/) in the pipeline to **authenticate** and **authorize** any http requests, if needed.
 
 ## Installation
 

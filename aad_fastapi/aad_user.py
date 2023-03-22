@@ -7,14 +7,7 @@ from .aad_token import AuthToken
 
 
 class AadUser(SimpleUser):
-    @staticmethod
-    def create_user(**kwargs):
-        user = AadUser(kwargs["username"])
-
-        for key, value in kwargs.items():
-            user.__dict__[key] = value
-
-        return user
+    """User object for Azure AD authentication."""
 
     id: Optional[str] = None
     name: Optional[str] = None
