@@ -20,7 +20,12 @@ def authorize(
     roles: typing.Union[str, typing.Sequence[str]] = None,
     role_requirement: RoleRequirement = RoleRequirement.ALL,
 ):
-    """authorize decorator. you can specify scopes and (or) roles"""
+    """
+    Decorator to authorize a route
+    :param scopes: list of scopes
+    :param roles: list of roles to validate
+    :param role_requirement: role requirement (RoleRequirement.ALL or RoleRequirement.ANY)
+    """
 
     def wrapper(endpoint):
         @wraps(endpoint)
@@ -57,7 +62,7 @@ def authorize(
 def oauth2_scheme(
     options: AzureAdSettings = None, env_path: Optional[str] = None, **kwargs
 ):
-    """get the OAUTH2 schema used for API Authentication"""
+    """get the OAuth2 schema used for API Authentication"""
 
     if options is None:
         options = AzureAdSettings(_env_file=env_path)

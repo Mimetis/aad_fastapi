@@ -6,6 +6,7 @@ from aad_fastapi.roles.role_requirement import RoleRequirement
 
 
 class RoleValidator:
+    """Role validator class"""
     _validators = {
         RoleRequirement.ALL: AllRoleValidator,
         RoleRequirement.ANY: AnyRoleValidator,
@@ -21,5 +22,6 @@ class RoleValidator:
             raise ValueError(f"Invalid role requirement: {role_requirement}")
 
     def validate_roles(self, user_roles: typing.List[str]) -> bool:
+        """validate the user roles against the mandatory roles"""
         validator = self.validator_class()
         return validator.validate_roles(user_roles, self.mandatory_roles)
