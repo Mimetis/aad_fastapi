@@ -7,6 +7,7 @@ from aad_fastapi.roles.role_requirement import RoleRequirement
 
 class RoleValidator:
     """Role validator class"""
+
     _validators = {
         RoleRequirement.ALL: AllRoleValidator,
         RoleRequirement.ANY: AnyRoleValidator,
