@@ -75,21 +75,25 @@ def mock_test_client(public_key):
     @app.get("/isauth_impersonation")
     @authorize("user_impersonation")
     async def get_isauth_with_impersonation(
-            request: Request, token=Depends(oauth2_scheme())
+        request: Request, token=Depends(oauth2_scheme())
     ):
         return request.user
 
     @app.get("/isauth_impersonation_all_roles")
     @authorize("user_impersonation", ["Admin", "Contributor"])
     async def get_isauth_with_impersonation_and_all_roles(
-            request: Request, token=Depends(oauth2_scheme())
+        request: Request, token=Depends(oauth2_scheme())
     ):
         return request.user
 
     @app.get("/isauth_impersonation_any_roles")
-    @authorize("user_impersonation", ["Admin", "Contributor"], role_requirement=RoleRequirement.ANY)
+    @authorize(
+        "user_impersonation",
+        ["Admin", "Contributor"],
+        role_requirement=RoleRequirement.ANY,
+    )
     async def get_isauth_with_impersonation_and_any_roles(
-            request: Request, token=Depends(oauth2_scheme())
+        request: Request, token=Depends(oauth2_scheme())
     ):
         return request.user
 

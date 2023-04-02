@@ -7,57 +7,57 @@ from aad_fastapi.roles.role_requirement import RoleRequirement
 
 
 def test_role_validator_all():
-    validator = RoleValidator(['admin', 'editor'], RoleRequirement.ALL)
-    user_roles = ['admin', 'editor']
+    validator = RoleValidator(["admin", "editor"], RoleRequirement.ALL)
+    user_roles = ["admin", "editor"]
     assert validator.validate_roles(user_roles)
 
 
 def test_role_validator_all_fail():
-    validator = RoleValidator(['admin', 'editor'], RoleRequirement.ALL)
-    user_roles = ['admin']
+    validator = RoleValidator(["admin", "editor"], RoleRequirement.ALL)
+    user_roles = ["admin"]
     assert not validator.validate_roles(user_roles)
 
 
 def test_role_validator_any():
-    validator = RoleValidator(['admin', 'editor'], RoleRequirement.ANY)
-    user_roles = ['admin']
+    validator = RoleValidator(["admin", "editor"], RoleRequirement.ANY)
+    user_roles = ["admin"]
     assert validator.validate_roles(user_roles)
 
 
 def test_role_validator_any_fail():
-    validator = RoleValidator(['admin', 'editor'], RoleRequirement.ANY)
-    user_roles = ['guest']
+    validator = RoleValidator(["admin", "editor"], RoleRequirement.ANY)
+    user_roles = ["guest"]
     assert not validator.validate_roles(user_roles)
 
 
 def test_role_validator_invalid_role_requirement():
     with pytest.raises(ValueError):
-        RoleValidator([], 'invalid')
+        RoleValidator([], "invalid")
 
 
 def test_all_role_validator():
     validator = AllRoleValidator()
-    mandatory_roles = ['admin', 'editor']
-    user_roles = ['admin', 'editor']
+    mandatory_roles = ["admin", "editor"]
+    user_roles = ["admin", "editor"]
     assert validator.validate_roles(user_roles, mandatory_roles)
 
 
 def test_all_role_validator_fail():
     validator = AllRoleValidator()
-    mandatory_roles = ['admin', 'editor']
-    user_roles = ['admin']
+    mandatory_roles = ["admin", "editor"]
+    user_roles = ["admin"]
     assert not validator.validate_roles(user_roles, mandatory_roles)
 
 
 def test_any_role_validator():
     validator = AnyRoleValidator()
-    mandatory_roles = ['admin', 'editor']
-    user_roles = ['admin']
+    mandatory_roles = ["admin", "editor"]
+    user_roles = ["admin"]
     assert validator.validate_roles(user_roles, mandatory_roles)
 
 
 def test_any_role_validator_fail():
     validator = AnyRoleValidator()
-    mandatory_roles = ['admin', 'editor']
-    user_roles = ['guest']
+    mandatory_roles = ["admin", "editor"]
+    user_roles = ["guest"]
     assert not validator.validate_roles(user_roles, mandatory_roles)

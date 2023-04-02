@@ -11,7 +11,9 @@ class RoleValidator:
         RoleRequirement.ANY: AnyRoleValidator,
     }
 
-    def __init__(self, mandatory_roles: typing.List[str], role_requirement: RoleRequirement):
+    def __init__(
+        self, mandatory_roles: typing.List[str], role_requirement: RoleRequirement
+    ):
         self.mandatory_roles = mandatory_roles
         self.role_requirement = role_requirement
         self.validator_class = self._validators.get(role_requirement)
