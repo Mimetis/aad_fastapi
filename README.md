@@ -86,6 +86,21 @@ async def user_with_scope_and_roles(
 ```
 
 
+### Role Requirements
+To require at least one of the specified roles, you can use the role_requirement parameter with the value 
+RoleRequirement.ANY:
+
+``` python
+Copy code
+@app.get("/user_with_scope_and_roles_any")
+@authorize("user_impersonation", roles=["admin","superuser"], role_requirement=RoleRequirement.ANY)
+async def user_with_scope_and_roles_any(
+    request: Request, token=Depends(oauth2_scheme(options=api_options))
+):
+    # code here
+```
+Note that `RoleRequirement.ALL` is the default behavior and does not need to be specified.
+
 ## Register your application within your Azure AD tenant
 
 There are two applications to register:
