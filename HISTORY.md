@@ -4,6 +4,19 @@ Changelog
 
 (unreleased)
 ------------
+- Added role_requirements.Any\All behaviour to the authorize decorator
+  (#7) [Dor Lugasi-Gal]
+
+  * added role_requirements.Any\All behavior to the authorized decorator
+  * Added some docstrings
+  * formatting
+  * merge tests with parametrize
+  * readme update
+
+
+1.0.5 (2023-03-22)
+------------------
+- Release: version 1.0.5 🚀 [Dor Lugasi-Gal]
 - Merge pull request #6 from Mimetis/dorlu/fix/pipe-options-to-bearer-
   backend. [Dor Lugasi-Gal]
 
