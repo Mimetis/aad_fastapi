@@ -11,24 +11,26 @@ from starlette.requests import Request
 
 from .aad_options import AzureAdSettings
 from .aad_user import AadUser
+from .roles.role_requirement import RoleRequirement
+from .roles.role_validator import RoleValidator
 
 
 def authorize(
     scopes: typing.Union[str, typing.Sequence[str]] = None,
     roles: typing.Union[str, typing.Sequence[str]] = None,
+    role_requirement: RoleRequirement = RoleRequirement.ALL,
 ):
-    """authorize decorator. you can specify scopes and (or) roles"""
+    """
+    Decorator to authorize a route
+    :param scopes: list of scopes
+    :param roles: list of roles to validate
+    :param role_requirement: role requirement (RoleRequirement.ALL or RoleRequirement.ANY)
+    """
 
     def wrapper(endpoint):
         @wraps(endpoint)
         @requires(scopes)
         async def require_auth_endpoint(request: Request, *args, **kwargs):
-            def has_required_roles(user_roles: typing.Sequence[str]) -> bool:
-                for mandatory_role in mandatory_roles_list:
-                    if mandatory_role not in user_roles:
-                        return False
-                return True
-
             # Check args
             mandatory_roles_list = []
             if roles is not None:
@@ -39,7 +41,10 @@ def authorize(
             user: AadUser = request.user
             user_roles_list = user.roles_id or []
 
-            if len(mandatory_roles_list) > 0 and not has_required_roles(user_roles_list):
+            role_validator = RoleValidator(mandatory_roles_list, role_requirement)
+            if len(mandatory_roles_list) > 0 and not role_validator.validate_roles(
+                user_roles_list
+            ):
                 raise HTTPException(status_code=403, detail="Unauthorized role")
 
             if inspect.iscoroutinefunction(endpoint):
@@ -57,7 +62,7 @@ def authorize(
 def oauth2_scheme(
     options: AzureAdSettings = None, env_path: Optional[str] = None, **kwargs
 ):
-    """get the OAUTH2 schema used for API Authentication"""
+    """get the OAuth2 schema used for API Authentication"""
 
     if options is None:
         options = AzureAdSettings(_env_file=env_path)

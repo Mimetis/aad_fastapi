@@ -2,14 +2,16 @@ import os
 import sys
 
 import pytest
-from aad_fastapi import AadBearerBackend, authorize, oauth2_scheme
-from async_asgi_testclient import TestClient
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import FastAPI
 from fastapi.param_functions import Depends
+from fastapi.testclient import TestClient
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
+
+from aad_fastapi import AadBearerBackend, authorize, oauth2_scheme
+from aad_fastapi.roles.role_requirement import RoleRequirement
 
 os.environ["CLIENT_ID"] = "01010101-aaaa-bbbb-acdf-020202020202"
 os.environ["TENANT_ID"] = "02020202-aaaa-erty-olki-020202020202"
@@ -49,7 +51,7 @@ def cert():
 
 
 @pytest.fixture(scope="module")
-def client(public_key):
+def mock_test_client(public_key):
     # pre fill client id
     swagger_ui_init_oauth = {
         "clientId": os.environ.get("CLIENT_ID"),
@@ -77,9 +79,20 @@ def client(public_key):
     ):
         return request.user
 
-    @app.get("/isauth_impersonation_roles")
+    @app.get("/isauth_impersonation_all_roles")
     @authorize("user_impersonation", ["Admin", "Contributor"])
-    async def get_isauth_with_impersonation_and_roles(
+    async def get_isauth_with_impersonation_and_all_roles(
+        request: Request, token=Depends(oauth2_scheme())
+    ):
+        return request.user
+
+    @app.get("/isauth_impersonation_any_roles")
+    @authorize(
+        "user_impersonation",
+        ["Admin", "Contributor"],
+        role_requirement=RoleRequirement.ANY,
+    )
+    async def get_isauth_with_impersonation_and_any_roles(
         request: Request, token=Depends(oauth2_scheme())
     ):
         return request.user
