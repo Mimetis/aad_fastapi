@@ -4,6 +4,7 @@ Changelog
 
 (unreleased)
 ------------
+- Release: version ${TAG} ≡ƒÜÇ. [Dor Lugasi-Gal]
 - Added multidict. [Dor Lugasi-Gal]
 
 
