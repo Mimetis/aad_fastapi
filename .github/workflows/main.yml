@@ -74,6 +74,7 @@ jobs:
 
   tests_win:
     needs: linter
+
     strategy:
       fail-fast: false
       matrix:
@@ -86,7 +87,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Pip
-        run: pip install --user --upgrade pip
+        run: pip install --upgrade pip
       - name: Install project
         run: pip install -e .[test]
       - name: run tests
