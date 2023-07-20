@@ -87,7 +87,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Pip
-        run: pip install --upgrade pip
+        run: c:\hostedtoolcache\windows\python\3.7.9\x64\python.exe -m pip install --upgrade pip
       - name: Install project
         run: pip install -e .[test]
       - name: run tests
