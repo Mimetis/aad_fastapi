@@ -4,6 +4,15 @@ Changelog
 
 (unreleased)
 ------------
+- Py.exe. [Dor Lugasi-Gal]
+- Remove --user. [Dor Lugasi-Gal]
+- Make test to run on windows. [Dor Lugasi-Gal]
+- Pythonpath fix. [Dor Lugasi-Gal]
+
+
+1.1.1 (2023-07-20)
+------------------
+- Release: version 1.1.1 🚀 [Dor Lugasi-Gal]
 - Release: version ${TAG} ≡ƒÜÇ. [Dor Lugasi-Gal]
 - Added multidict. [Dor Lugasi-Gal]
 
