@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Added multidict. [Dor Lugasi-Gal]
+
+
+1.1.0 (2023-04-03)
+------------------
+- Release: version 1.1.0 🚀 [Dor Lugasi-Gal]
 - Added role_requirements.Any\All behaviour to the authorize decorator
   (#7) [Dor Lugasi-Gal]
 
