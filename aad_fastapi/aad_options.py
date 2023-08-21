@@ -3,7 +3,7 @@ from typing import List
 from urllib.parse import urlparse
 
 import requests
-from pydantic.env_settings import BaseSettings
+from pydantic_settings import BaseSettings
 from pydantic.fields import Field
 
 

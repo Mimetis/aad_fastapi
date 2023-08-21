@@ -20,6 +20,7 @@ os.environ["API_SCOPES"] = "user_impersonation"
 os.environ["AUTHORITY"] = "https://login.microsoftonline.com/common"
 os.environ["VAULT_URL"] = "https://your_key_vault_name.vault.azure.net/"
 os.environ["VAULT_CERTIFICATE_NAME"] = "certificate_name_from_your_key_vault"
+os.environ["VAULT_CERTIFICATE_KEY"] = "certificate_key_from_your_key_vault"
 
 
 @pytest.fixture(autouse=True)
