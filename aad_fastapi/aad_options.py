@@ -3,8 +3,8 @@ from typing import List
 from urllib.parse import urlparse
 
 import requests
-from pydantic_settings import BaseSettings
 from pydantic.fields import Field
+from pydantic_settings import BaseSettings
 
 
 class AzureAdSettings(BaseSettings):
@@ -27,20 +27,18 @@ class AzureAdSettings(BaseSettings):
 
     """
 
-    client_id: str = Field('', description="Client id", env="CLIENT_ID")
-    client_secret: str = Field(
-        '', description="Client Secret", env="CLIENT_SECRET")
-    authority: str = Field(
-        '', description="login authority", env="AUTHORITY")
-    domain: str = Field('', description="Domain name", env="DOMAIN")
-    tenant_id: str = Field('', description="Tenant Id", env="TENANT_ID")
-    scopes: str = Field('', description="Scopes", env="SCOPES")
-    vault_name: str = Field(
-        '', description="Global Vault Url", env="VAULT_NAME")
+    client_id: str = Field("", description="Client id", env="CLIENT_ID")
+    client_secret: str = Field("", description="Client Secret", env="CLIENT_SECRET")
+    authority: str = Field("", description="login authority", env="AUTHORITY")
+    domain: str = Field("", description="Domain name", env="DOMAIN")
+    tenant_id: str = Field("", description="Tenant Id", env="TENANT_ID")
+    scopes: str = Field("", description="Scopes", env="SCOPES")
+    vault_name: str = Field("", description="Global Vault Url", env="VAULT_NAME")
     vault_certificate_key: str = Field(
-        '', description="Certificate name", env="VAULT_CERTIFICATE_KEY")
+        "", description="Certificate name", env="VAULT_CERTIFICATE_KEY"
+    )
     vault_secret_key: str = Field(
-        '', description="Certificate name", env="VAULT_SECRET_KEY"
+        "", description="Certificate name", env="VAULT_SECRET_KEY"
     )
     aad_issuers_list: List[str] = []
 
@@ -80,10 +78,8 @@ class AzureAdSettings(BaseSettings):
         for _metadata in _metadatas:
             if _authority_domain in _metadata["preferred_network"]:
                 for alias in _metadata["aliases"]:
-                    self.aad_issuers_list.append(
-                        f"https://{alias}/{self.tenant_id}/")
-                    self.aad_issuers_list.append(
-                        f"https://{alias}/{self.tenant_id}/v2.0")
+                    self.aad_issuers_list.append(f"https://{alias}/{self.tenant_id}/")
+                    self.aad_issuers_list.append(f"https://{alias}/{self.tenant_id}/v2.0")
 
         return self.aad_issuers_list
 
