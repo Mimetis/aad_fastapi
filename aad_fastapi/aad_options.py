@@ -1,5 +1,5 @@
 import typing
-from typing import List
+from typing import List, Optional
 from urllib.parse import urlparse
 
 import requests
@@ -24,21 +24,27 @@ class AzureAdSettings(BaseSettings):
     if not present, each value will be retrieved from environment variables:
     "CLIENT_ID", "AUTHORITY", "DOMAIN", "TENANT_ID", "API_SCOPES",
     "VAULT_URL", "VAULT_CERTIFICATE_NAME"
-
     """
 
-    client_id: str = Field("", description="Client id", env="CLIENT_ID")
-    client_secret: str = Field("", description="Client Secret", env="CLIENT_SECRET")
-    authority: str = Field("", description="login authority", env="AUTHORITY")
-    domain: str = Field("", description="Domain name", env="DOMAIN")
-    tenant_id: str = Field("", description="Tenant Id", env="TENANT_ID")
-    scopes: str = Field("", description="Scopes", env="SCOPES")
-    vault_name: str = Field("", description="Global Vault Url", env="VAULT_NAME")
-    vault_certificate_key: str = Field(
-        "", description="Certificate name", env="VAULT_CERTIFICATE_KEY"
+    client_id: str = Field(None, description="Client id", env="CLIENT_ID")
+    client_secret: Optional[str] = Field(
+        None, description="Client Secret", env="CLIENT_SECRET"
     )
-    vault_secret_key: str = Field(
-        "", description="Certificate name", env="VAULT_SECRET_KEY"
+    authority: Optional[str] = Field(None, description="login authority", env="AUTHORITY")
+    domain: Optional[str] = Field(None, description="Domain name", env="DOMAIN")
+    tenant_id: Optional[str] = Field(None, description="Tenant Id", env="TENANT_ID")
+    scopes: Optional[str] = Field(None, description="Scopes", env="SCOPES")
+    vault_name: Optional[str] = Field(
+        None, description="Global Vault Url", env="VAULT_NAME"
+    )
+    vault_certificate_key: Optional[str] = Field(
+        None,
+        description="Certificate name",
+        env="VAULT_CERTIFICATE_KEY",
+        required=False,
+    )
+    vault_secret_key: Optional[str] = Field(
+        None, description="Certificate name", env="VAULT_SECRET_KEY"
     )
     aad_issuers_list: List[str] = []
 
