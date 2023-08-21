@@ -14,14 +14,13 @@ from aad_fastapi import AadBearerBackend, authorize, oauth2_scheme
 from aad_fastapi.roles.role_requirement import RoleRequirement
 
 os.environ["CLIENT_ID"] = "01010101-aaaa-bbbb-acdf-020202020202"
-os.environ["CLIENT_SECRET"] = "a_secret_from_azure_ad"
 os.environ["TENANT_ID"] = "02020202-aaaa-erty-olki-020202020202"
 os.environ["DOMAIN"] = "contoso.onmicrosoft.com"
 os.environ["API_SCOPES"] = "user_impersonation"
 os.environ["AUTHORITY"] = "https://login.microsoftonline.com/common"
 os.environ["VAULT_URL"] = "https://your_key_vault_name.vault.azure.net/"
 os.environ["VAULT_CERTIFICATE_NAME"] = "certificate_name_from_your_key_vault"
-# os.environ["VAULT_CERTIFICATE_KEY"] = "certificate_key_from_your_key_vault"
+os.environ["VAULT_CERTIFICATE_KEY"] = "certificate_key_from_your_key_vault"
 
 
 @pytest.fixture(autouse=True)
