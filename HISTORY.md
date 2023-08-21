@@ -4,6 +4,24 @@ Changelog
 
 (unreleased)
 ------------
+- Merge pull request #10 from Mimetis/spertus/specify-frameworks-
+  version. [Sébastien Pertus]
+
+  Do not specify strict versions
+- Removed uncessary env vars for test. [Sebastien Pertus]
+- Reloved unecessary test env variable. [Sebastien Pertus]
+- Make Field as Optional. [Sebastien Pertus]
+- Reformat. [Sebastien Pertus]
+- Replacing None with empty string. [Sebastien Pertus]
+- Resolve issue with basesettings. [Sebastien Pertus]
+- Update requirements of fastapi to include all dependencies. [Sebastien
+  Pertus]
+- Do not specify strict versions. [Sebastien Pertus]
+
+
+1.1.2 (2023-07-20)
+------------------
+- Release: version 1.1.2 🚀 [Dor Lugasi-Gal]
 - Py.exe. [Dor Lugasi-Gal]
 - Remove --user. [Dor Lugasi-Gal]
 - Make test to run on windows. [Dor Lugasi-Gal]
