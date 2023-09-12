@@ -2,8 +2,9 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+1.1.4 (2023-09-12)
+------------------
+- Release: version 1.1.4 🚀 [Sebastien Pertus]
 - Merge pull request #11 from Mimetis/add-optional-extra-allowed.
   [Sébastien Pertus]
 
