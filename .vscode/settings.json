@@ -1,0 +1,11 @@
+{
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "black-formatter.args": [
+        "--line-length",
+        "90"
+    ],
+    "flake8.args": [
+        "-l",
+        "90"
+    ]
+}

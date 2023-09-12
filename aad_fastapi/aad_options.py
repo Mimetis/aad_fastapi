@@ -31,12 +31,9 @@ class AzureAdSettings(BaseSettings):
     client_secret: Optional[str] = Field(
         None, description="Client Secret", env="CLIENT_SECRET"
     )
-    authority: Optional[str] = Field(
-        None, description="login authority", env="AUTHORITY")
-    domain: Optional[str] = Field(
-        None, description="Domain name", env="DOMAIN")
-    tenant_id: Optional[str] = Field(
-        None, description="Tenant Id", env="TENANT_ID")
+    authority: Optional[str] = Field(None, description="login authority", env="AUTHORITY")
+    domain: Optional[str] = Field(None, description="Domain name", env="DOMAIN")
+    tenant_id: Optional[str] = Field(None, description="Tenant Id", env="TENANT_ID")
     scopes: Optional[str] = Field(None, description="Scopes", env="SCOPES")
     vault_name: Optional[str] = Field(
         None, description="Global Vault Url", env="VAULT_NAME"
@@ -88,10 +85,8 @@ class AzureAdSettings(BaseSettings):
         for _metadata in _metadatas:
             if _authority_domain in _metadata["preferred_network"]:
                 for alias in _metadata["aliases"]:
-                    self.aad_issuers_list.append(
-                        f"https://{alias}/{self.tenant_id}/")
-                    self.aad_issuers_list.append(
-                        f"https://{alias}/{self.tenant_id}/v2.0")
+                    self.aad_issuers_list.append(f"https://{alias}/{self.tenant_id}/")
+                    self.aad_issuers_list.append(f"https://{alias}/{self.tenant_id}/v2.0")
 
         return self.aad_issuers_list
 
