@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import requests
 from pydantic.fields import Field
 from pydantic_settings import BaseSettings
-
+from pydantic import Extra
 
 class AzureAdSettings(BaseSettings):
     """
@@ -115,3 +115,4 @@ class AzureAdSettings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        extra=Extra.allow
