@@ -4,6 +4,18 @@ Changelog
 
 (unreleased)
 ------------
+- Merge pull request #11 from Mimetis/add-optional-extra-allowed.
+  [Sébastien Pertus]
+
+  add extra
+- Add flake8 / black extensions. [Sebastien Pertus]
+- Fix lint. [Sebastien Pertus]
+- Add extra. [Sebastien Pertus]
+
+
+1.1.3 (2023-08-21)
+------------------
+- Release: version 1.1.3 🚀 [Sebastien Pertus]
 - Merge pull request #10 from Mimetis/spertus/specify-frameworks-
   version. [Sébastien Pertus]
 
