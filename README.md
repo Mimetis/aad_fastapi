@@ -64,7 +64,7 @@ Or directly to your web api route:
 async def user(request: Request, token=Depends(oauth2_scheme(options=api_options))):
    return request.user
 ```
-
+**It's important to have the `Request` object set as the first parameter for your endpoint**
 > if you are inspecting the `request.user` object, you will find all the user's property retrieved from **Azure AD**.
 
 You can specify **scopes** and / or **roles**, using **decorators**, to be checked before accessing your web api:
