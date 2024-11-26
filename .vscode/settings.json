@@ -7,5 +7,6 @@
     "flake8.args": [
         "-l",
         "90"
-    ]
+    ],
+    "python.envFile": "${workspaceFolder}/python-path.env",
 }

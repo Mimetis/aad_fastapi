@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 import requests
 from pydantic.fields import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Extra
 
 
@@ -26,6 +26,10 @@ class AzureAdSettings(BaseSettings):
     "CLIENT_ID", "AUTHORITY", "DOMAIN", "TENANT_ID", "API_SCOPES",
     "VAULT_URL", "VAULT_CERTIFICATE_NAME"
     """
+
+    model_config = SettingsConfigDict(
+        env_file=".env", validate_default=False, extra="allow"
+    )
 
     client_id: str = Field(None, description="Client id", env="CLIENT_ID")
     client_secret: Optional[str] = Field(
@@ -113,7 +117,3 @@ class AzureAdSettings(BaseSettings):
                     _scopes.append(_scp)
 
         return _scopes
-
-    class Config:
-        env_file = ".env"
-        extra = Extra.allow
