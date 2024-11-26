@@ -2,6 +2,13 @@ Changelog
 =========
 
 
+(unreleased)
+------------
+- Remove requirements version. Update aad_options. [Sebastien Pertus]
+- Update README.md. [Dor Lugasi-Gal]
+- Release: version 1.1.4 🚀 [Sebastien Pertus]
+
+
 1.1.4 (2023-09-12)
 ------------------
 - Release: version 1.1.4 🚀 [Sebastien Pertus]
