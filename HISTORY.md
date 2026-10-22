@@ -4,6 +4,37 @@ Changelog
 
 (unreleased)
 ------------
+- Add FastAPI-native Authorize dependency for route authorization and
+  update documentation. [Sébastien]
+- Refactor CI/CD workflows and update dependencies for improved
+  compatibility and security. [Sébastien]
+- Remove setup.py and test requirements files to streamline project
+  structure. [Sébastien]
+- Enhance token validation and authorization handling in Azure AD
+  integration. [Sébastien]
+
+  - Added detailed token validation rules in README.md.
+  - Refactored token decoding logic to enforce audience and issuer checks.
+  - Introduced support for app-only tokens with roles in permission validation.
+  - Updated AzureAdSettings to allow configuration of token permission requirements.
+  - Improved test coverage for token validation and authorization scenarios.
+- Refactor code for improved type handling and error checking across
+  multiple modules. [Sébastien]
+- Refactor token decoding and Azure AD settings for improved clarity and
+  error handling. [Sébastien]
+- Enhance JWT handling and testing: - Update settings for Python
+  analysis and testing in VSCode. - Refactor AadDiscoverKey for improved
+  key management and caching. - Modify aad_helpers to streamline token
+  decoding and error handling. - Update AadUser claims type to use Dict
+  for better flexibility. - Revise requirements to remove unused
+  libraries and ensure compatibility. - Improve test coverage for token
+  decoding and claims validation. - Update README with clearer
+  instructions on mocking Azure AD responses. [Sébastien]
+
+
+1.1.5 (2024-11-26)
+------------------
+- Release: version 1.1.5 🚀 [Sebastien Pertus]
 - Remove requirements version. Update aad_options. [Sebastien Pertus]
 - Update README.md. [Dor Lugasi-Gal]
 - Release: version 1.1.4 🚀 [Sebastien Pertus]
