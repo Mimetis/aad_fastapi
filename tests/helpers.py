@@ -1,11 +1,14 @@
+import base64
 import json
 from datetime import datetime, timedelta
 from typing import List
 
-from authlib.common import encoding
-from authlib.jose import jwt
+import jwt
 
 from aad_fastapi.aad_options import AzureAdSettings
+
+# kid used to sign all the generated test tokens
+TEST_KEY_ID = "nOo3ZDrODXEK1jKWhXslHR_KXEg"
 
 
 def gen_client_info(options: AzureAdSettings, **kwargs):
@@ -18,8 +21,8 @@ def gen_client_info(options: AzureAdSettings, **kwargs):
 
     header = {"uid": uid, "utid": utid}
 
-    dump = encoding.json_dumps(header)
-    dump_bytes = encoding.json_b64encode(dump)
+    dump = json.dumps(header, separators=(",", ":"))
+    dump_bytes = base64.urlsafe_b64encode(dump.encode()).rstrip(b"=")
 
     return dump_bytes.decode("utf-8")
 
@@ -98,12 +101,10 @@ def gen_access_token(
     header = {
         "alg": "RS256",
         "typ": "JWT",
-        "kid": "nOo3ZDrODXEK1jKWhXslHR_KXEg",
+        "kid": kwargs.pop("kid", TEST_KEY_ID),
     }
 
-    dump_bytes = jwt.encode(header, payload, private_key)
-
-    return dump_bytes.decode("utf-8")
+    return jwt.encode(payload, private_key, algorithm="RS256", headers=header)
 
 
 def gen_payload(

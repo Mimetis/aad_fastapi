@@ -1,16 +1,21 @@
+import io
+import json
 import os
 import sys
+import urllib.request
 
+import jwt
 import pytest
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import FastAPI
 from fastapi.param_functions import Depends
 from fastapi.testclient import TestClient
+from helpers import TEST_KEY_ID
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
-from aad_fastapi import AadBearerBackend, authorize, oauth2_scheme
+from aad_fastapi import AadBearerBackend, AadDiscoverKey, authorize, oauth2_scheme
 from aad_fastapi.roles.role_requirement import RoleRequirement
 
 os.environ["CLIENT_ID"] = "01010101-aaaa-bbbb-acdf-020202020202"
@@ -48,6 +53,26 @@ def cert():
     public_key = private_key.public_key()
 
     return {"public_key": public_key, "private_key": private_key}
+
+
+@pytest.fixture
+def jwks_endpoint(monkeypatch: pytest.MonkeyPatch, public_key):
+    """Mock the Azure AD keys endpoint, serving the test public key.
+
+    Returns a dict with the keys url, the served jwks and the requests count.
+    """
+    jwk = jwt.algorithms.RSAAlgorithm.to_jwk(public_key, as_dict=True)
+    jwk.update({"kid": TEST_KEY_ID, "use": "sig", "alg": "RS256"})
+    endpoint = {"url": "https://keys_url", "jwks": {"keys": [jwk]}, "calls": 0}
+
+    class FakeOpener:
+        def open(self, request, timeout=None):
+            endpoint["calls"] += 1
+            return io.BytesIO(json.dumps(endpoint["jwks"]).encode())
+
+    monkeypatch.setattr(urllib.request, "build_opener", lambda *_: FakeOpener())
+    monkeypatch.setattr(AadDiscoverKey, "_clients", {})
+    return endpoint
 
 
 @pytest.fixture(scope="module")

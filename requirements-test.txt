@@ -7,8 +7,8 @@ pytest-cov
 codecov
 gitchangelog
 mkdocs
-Authlib
-msal
+PyJWT[crypto]>=2.8.0
+requests
 azure-identity
 azure-keyvault
 azure-keyvault-certificates

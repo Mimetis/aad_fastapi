@@ -1,37 +1,14 @@
 import json
 
 import pytest
-import requests
 from aad_fastapi import AadDiscoverKey, AuthError, AuthToken, AzureAdSettings
 from helpers import gen_payload
-from requests.models import Response
 
 
-def test_discover_keys(monkeypatch: pytest.MonkeyPatch):
-    keys = {
-        "keys": [
-            {
-                "kty": "RSA",
-                "use": "sig",
-                "kid": "nOo3ZDrODXEK1jKWhXslHR_KXEg",
-                "x5t": "nOo3ZDrODXEK1jKWhXslHR_KXEg",
-                "n": "oaLLT9hkcSj2tGfZsjbu7Xz1Krs0",
-                "e": "AQAB",
-                "x5c": ["MIIDBTCCAe"],
-                "issuer": "https://login.microsoftonline.com/aaaaaaa-/v2.0",
-            }
-        ]
-    }
-    data = json.dumps(keys)
-    response = Response()
-    response.status_code = 200
-    response._content = data.encode()
-    response.reason = "OK"
-    monkeypatch.setattr(requests, "get", lambda url: response)
+def test_discover_keys(jwks_endpoint):
+    keys = AadDiscoverKey.get_discovery_key_json(jwks_endpoint["url"])
 
-    keys = AadDiscoverKey.get_discovery_key_json("https://keys_url")
-
-    assert keys is not None
+    assert keys == jwks_endpoint["jwks"]
 
 
 def test_aad_error_status():
