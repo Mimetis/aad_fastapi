@@ -87,7 +87,7 @@ def test_decode_token_expired(private_key, public_key):
 def test_decode_token_rejects_unsigned_token(public_key):
     """Ensures the "none" algorithm (unsigned token) is rejected"""
 
-    access_token = jwt.encode({"oid": "jdoe1"}, None, algorithm="none")
+    access_token = jwt.encode({"oid": "jdoe1"}, "", algorithm="none")
 
     with pytest.raises(AuthError):
         _decode_token(access_token, public_key=public_key)

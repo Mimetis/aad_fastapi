@@ -4,7 +4,6 @@ import os
 import sys
 import urllib.request
 
-import jwt
 import pytest
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -12,6 +11,7 @@ from fastapi import FastAPI
 from fastapi.param_functions import Depends
 from fastapi.testclient import TestClient
 from helpers import TEST_KEY_ID
+from jwt.algorithms import RSAAlgorithm
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
@@ -61,7 +61,7 @@ def jwks_endpoint(monkeypatch: pytest.MonkeyPatch, public_key):
 
     Returns a dict with the keys url, the served jwks and the requests count.
     """
-    jwk = jwt.algorithms.RSAAlgorithm.to_jwk(public_key, as_dict=True)
+    jwk = RSAAlgorithm.to_jwk(public_key, as_dict=True)
     jwk.update({"kid": TEST_KEY_ID, "use": "sig", "alg": "RS256"})
     endpoint = {"url": "https://keys_url", "jwks": {"keys": [jwk]}, "calls": 0}
 

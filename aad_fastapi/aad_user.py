@@ -17,5 +17,5 @@ class AadUser(SimpleUser):
     groups: Optional[List[str]] = None
     scopes: Optional[List[str]] = None
     claims: Optional[Dict[str, Any]] = None
-    company: Optional[any] = None
+    company: Optional[Any] = None
     is_interactive: bool = True

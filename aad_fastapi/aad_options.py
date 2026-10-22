@@ -5,7 +5,6 @@ from urllib.parse import urlparse
 import requests
 from pydantic.fields import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Extra
 
 
 class AzureAdSettings(BaseSettings):
@@ -31,26 +30,17 @@ class AzureAdSettings(BaseSettings):
         env_file=".env", validate_default=False, extra="allow"
     )
 
-    client_id: str = Field(None, description="Client id", env="CLIENT_ID")
-    client_secret: Optional[str] = Field(
-        None, description="Client Secret", env="CLIENT_SECRET"
-    )
-    authority: Optional[str] = Field(None, description="login authority", env="AUTHORITY")
-    domain: Optional[str] = Field(None, description="Domain name", env="DOMAIN")
-    tenant_id: Optional[str] = Field(None, description="Tenant Id", env="TENANT_ID")
-    scopes: Optional[str] = Field(None, description="Scopes", env="SCOPES")
-    vault_name: Optional[str] = Field(
-        None, description="Global Vault Url", env="VAULT_NAME"
-    )
+    client_id: Optional[str] = Field(default=None, description="Client id")
+    client_secret: Optional[str] = Field(default=None, description="Client Secret")
+    authority: Optional[str] = Field(default=None, description="login authority")
+    domain: Optional[str] = Field(default=None, description="Domain name")
+    tenant_id: Optional[str] = Field(default=None, description="Tenant Id")
+    scopes: Optional[str] = Field(default=None, description="Scopes")
+    vault_name: Optional[str] = Field(default=None, description="Global Vault Url")
     vault_certificate_key: Optional[str] = Field(
-        None,
-        description="Certificate name",
-        env="VAULT_CERTIFICATE_KEY",
-        required=False,
+        default=None, description="Certificate name"
     )
-    vault_secret_key: Optional[str] = Field(
-        None, description="Certificate name", env="VAULT_SECRET_KEY"
-    )
+    vault_secret_key: Optional[str] = Field(default=None, description="Certificate name")
     aad_issuers_list: List[str] = []
 
     @property

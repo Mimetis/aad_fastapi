@@ -1,9 +1,10 @@
 import base64
 import json
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Union
 
 import jwt
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
 from aad_fastapi.aad_options import AzureAdSettings
 
@@ -29,7 +30,7 @@ def gen_client_info(options: AzureAdSettings, **kwargs):
 
 def gen_access_token(
     options: AzureAdSettings,
-    private_key: str,
+    private_key: Union[str, RSAPrivateKey],
     use_service_principal=False,
     **kwargs,
 ):
@@ -109,7 +110,7 @@ def gen_access_token(
 
 def gen_payload(
     options: AzureAdSettings,
-    private_key: str,
+    private_key: Union[str, RSAPrivateKey],
     use_service_principal=False,
     **kwargs,
 ):

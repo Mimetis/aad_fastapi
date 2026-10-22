@@ -44,19 +44,14 @@ def _decode_token_without_validating_signature(
 
 
 def _decode_token(
-    auth_token: typing.Union[AuthToken, str], keys_url=None, **kwargs
+    auth_token: typing.Union[AuthToken, str],
+    keys_url: Optional[str] = None,
+    **kwargs,
 ) -> Dict[str, Any]:
     """Decode an access token using public key or key to retrieve the public key"""
 
     try:
         public_key = kwargs.pop("public_key", None)
-
-        if keys_url is None and public_key is None:
-            raise AuthError(
-                "invalid_public_key",
-                "public_key or key_url must be specified to be able to get the "
-                "public key to decode the token",
-            )
 
         auth_token = AuthToken(auth_token) if isinstance(auth_token, str) else auth_token
 
@@ -73,9 +68,15 @@ def _decode_token(
             jwkey = (
                 jwt.PyJWK(public_key).key if isinstance(public_key, dict) else public_key
             )
-        else:
+        elif keys_url is not None:
             # get the signing key matching the token "kid" header
             jwkey = AadDiscoverKey.get_signing_key(keys_url, token).key
+        else:
+            raise AuthError(
+                "invalid_public_key",
+                "public_key or key_url must be specified to be able to get the "
+                "public key to decode the token",
+            )
 
         # signature, exp, nbf and iat are verified here.
         # aud and iss are verified by _validate_claims
@@ -102,8 +103,8 @@ def _require_claim(claims: Dict[str, Any], name: str):
 
 def _validate_claims(
     claims: Dict[str, Any],
-    audiences: typing.Union[str, typing.List[str]] = None,
-    issuers: typing.Union[str, typing.List[str]] = None,
+    audiences: Optional[typing.Union[str, typing.List[str]]] = None,
+    issuers: Optional[typing.Union[str, typing.List[str]]] = None,
 ):
     """Validate a claims."""
 
@@ -151,12 +152,13 @@ def _validate_claims(
 def ensure_user_from_token(
     auth_token: AuthToken,
     validate: bool = True,
-    options: AzureAdSettings = None,
+    options: Optional[AzureAdSettings] = None,
     env_path: Optional[str] = None,
     **kwargs,
 ):
     if options is None:
-        options = AzureAdSettings(_env_file=env_path)
+        # _env_file is a pydantic-settings runtime argument, unknown to pyright
+        options = AzureAdSettings(_env_file=env_path)  # pyright: ignore[reportCallIssue]
 
     if validate:
         claims = _decode_token(
@@ -179,12 +181,12 @@ def _get_user_from_claims(claims: Dict[str, Any]) -> AadUser:
     scopes = ["authenticated"]
 
     # scopes can be a list or an array
-    if claims.get("scp") is not None:
-        scp = claims.get("scp")
+    scp = claims.get("scp")
+    if scp is not None:
         if isinstance(scp, typing.List):
             scopes.extend(scp)
         else:
-            for _scp in str.split(scp, " "):
+            for _scp in str(scp).split(" "):
                 scopes.append(_scp)
 
     username_key = "preferred_username"
