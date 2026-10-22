@@ -107,6 +107,35 @@ async def user_with_scope_and_roles_any(
 ```
 > **NOTE:** `RoleRequirement.ALL` is the default behavior and does not need to be specified.
 
+### Using FastAPI dependencies
+
+Instead of the `@authorize` decorator, you can use the `Authorize` dependency, with the same parameters. It returns the authenticated `AadUser`, and can protect a route or a whole router:
+
+``` python
+from aad_fastapi import AadUser, Authorize
+
+@app.get("/me")
+async def me(user: AadUser = Depends(Authorize("user_impersonation"))):
+    return user
+
+# every route of this router requires the "Data.Read" role
+router = APIRouter(dependencies=[Depends(Authorize(roles=["Data.Read"]))])
+```
+
+- A request without any token gets a `401` response, with a `WWW-Authenticate: Bearer` header (an invalid token is rejected by `AadBearerBackend`).
+- A request without the required scopes or roles gets a `403` response.
+- Pass your OAuth2 scheme to document the route security and its scopes in OpenAPI (and get the lock icon in the Swagger UI):
+
+``` python
+oauth2 = oauth2_scheme(options=api_options)
+
+@app.get("/user_with_scope")
+async def user_with_scope(
+    user: AadUser = Depends(Authorize("user_impersonation", scheme=oauth2))
+):
+    return user
+```
+
 ### Token validation
 
 `AadBearerBackend` rejects any request carrying an invalid bearer token. A token is valid when:
