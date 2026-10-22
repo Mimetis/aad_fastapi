@@ -18,10 +18,16 @@ class AadBearerBackend(AuthenticationBackend):
     _discovery_keys = None
 
     def __init__(
-        self, options: AzureAdSettings = None, env_path: Optional[str] = None, **kwargs
+        self,
+        options: Optional[AzureAdSettings] = None,
+        env_path: Optional[str] = None,
+        **kwargs,
     ):
         if options is None:
-            options = AzureAdSettings(_env_file=env_path)
+            # _env_file is a pydantic-settings runtime argument, unknown to pyright
+            options = AzureAdSettings(
+                _env_file=env_path  # pyright: ignore[reportCallIssue]
+            )
 
         self.options = options
 
@@ -46,6 +52,9 @@ class AadBearerBackend(AuthenticationBackend):
             user = ensure_user_from_token(
                 auth_token, public_key=self.public_key, options=self.options
             )
+
+            if user.claims is None:
+                raise AuthError("invalid_token", "No claims found in token")
 
             # validate the claims
             _validate_claims(

@@ -30,7 +30,10 @@ class AadVault:
         )
 
         # Get the hexadecimal thumbprint from X509 binary thumbprint value
-        thumbprint = binascii.hexlify(certificate.properties.x509_thumbprint)
+        properties = certificate.properties
+        if properties is None or properties.x509_thumbprint is None:
+            raise ValueError(f"Certificate '{vault_certificate_key}' has no thumbprint")
+        thumbprint = binascii.hexlify(properties.x509_thumbprint)
 
         certificate = {
             "private_key": certificate_secret.value,

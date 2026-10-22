@@ -22,7 +22,7 @@ def test_role_validator(roles, requirement, user_roles, expected):
 
 def test_role_validator_invalid_role_requirement():
     with pytest.raises(ValueError):
-        RoleValidator([], "invalid")
+        RoleValidator([], "invalid")  # pyright: ignore[reportArgumentType]
 
 
 @pytest.mark.parametrize(

@@ -16,20 +16,23 @@ from .roles.role_validator import RoleValidator
 
 
 def authorize(
-    scopes: typing.Union[str, typing.Sequence[str]] = None,
-    roles: typing.Union[str, typing.Sequence[str]] = None,
+    scopes: Optional[typing.Union[str, typing.Sequence[str]]] = None,
+    roles: Optional[typing.Union[str, typing.Sequence[str]]] = None,
     role_requirement: RoleRequirement = RoleRequirement.ALL,
 ):
     """
     Decorator to authorize a route
-    :param scopes: list of scopes
+    :param scopes: list of scopes (if not set, only an authenticated user is required)
     :param roles: list of roles to validate
     :param role_requirement: role requirement (RoleRequirement.ALL or RoleRequirement.ANY)
     """
 
+    # every authenticated AadUser has the "authenticated" scope
+    required_scopes = scopes if scopes is not None else "authenticated"
+
     def wrapper(endpoint):
         @wraps(endpoint)
-        @requires(scopes)
+        @requires(required_scopes)
         async def require_auth_endpoint(request: Request, *args, **kwargs):
             # Check args
             mandatory_roles_list = []
@@ -60,12 +63,13 @@ def authorize(
 
 
 def oauth2_scheme(
-    options: AzureAdSettings = None, env_path: Optional[str] = None, **kwargs
+    options: Optional[AzureAdSettings] = None, env_path: Optional[str] = None, **kwargs
 ):
     """get the OAuth2 schema used for API Authentication"""
 
     if options is None:
-        options = AzureAdSettings(_env_file=env_path)
+        # _env_file is a pydantic-settings runtime argument, unknown to pyright
+        options = AzureAdSettings(_env_file=env_path)  # pyright: ignore[reportCallIssue]
 
     scopes_dictionary = {}
     if options.scopes_list is not None:

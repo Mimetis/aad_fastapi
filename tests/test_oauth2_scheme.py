@@ -1,3 +1,5 @@
+from fastapi.openapi.models import OAuth2 as OAuth2Model
+
 from aad_fastapi import oauth2_scheme
 from aad_fastapi.aad_options import AzureAdSettings
 
@@ -17,13 +19,17 @@ def test_oauth2_scheme_custom_options_is_set():
     oauth2 = oauth2_scheme(options=options)
     assert_oauth_scheme(oauth2)
 
+    model = oauth2.model
+    assert isinstance(model, OAuth2Model)
+    authorization_code = model.flows.authorizationCode
+    assert authorization_code is not None
     assert (
-        oauth2.model.flows.authorizationCode.authorizationUrl
+        authorization_code.authorizationUrl
         == "https://login.microsoftonline.com/tenant_id/oauth2/v2.0/authorize"
     )
-    assert len(oauth2.model.flows.authorizationCode.scopes) == 2
-    assert list(oauth2.model.flows.authorizationCode.scopes)[0] == "scope1"
-    assert list(oauth2.model.flows.authorizationCode.scopes)[1] == "scope2"
+    assert len(authorization_code.scopes) == 2
+    assert list(authorization_code.scopes)[0] == "scope1"
+    assert list(authorization_code.scopes)[1] == "scope2"
 
 
 def assert_oauth_scheme(oauth2):

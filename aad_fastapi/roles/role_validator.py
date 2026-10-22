@@ -18,9 +18,10 @@ class RoleValidator:
     ):
         self.mandatory_roles = mandatory_roles
         self.role_requirement = role_requirement
-        self.validator_class = self._validators.get(role_requirement)
-        if self.validator_class is None:
+        validator_class = self._validators.get(role_requirement)
+        if validator_class is None:
             raise ValueError(f"Invalid role requirement: {role_requirement}")
+        self.validator_class = validator_class
 
     def validate_roles(self, user_roles: typing.List[str]) -> bool:
         """validate the user roles against the mandatory roles"""

@@ -2,8 +2,8 @@ from typing import Optional
 
 
 class AuthError(Exception):
-    code: str
-    description: str
+    code: Optional[str]
+    description: Optional[str]
 
     def __init__(
         self,

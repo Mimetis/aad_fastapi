@@ -1,3 +1,5 @@
+from typing import Optional
+
 import requests
 
 
@@ -5,7 +7,7 @@ class MinimalHttpClient:
     def __init__(self, verify=True, proxies=None, timeout=None):
         self.session = requests.Session()
         self.session.verify = verify
-        self.session.proxies = proxies
+        self.session.proxies = proxies or {}
         self.timeout = timeout
 
     def post(self, url, params=None, data=None, headers=None, **kwargs):
@@ -28,9 +30,17 @@ class MinimalHttpClient:
 
 
 class MinimalResponse(object):  # Not for production use
-    def __init__(self, requests_resp=None, status_code=None, text=None):
-        self.status_code = status_code or requests_resp.status_code
-        self.text = text or requests_resp.text
+    def __init__(
+        self,
+        requests_resp: Optional[requests.Response] = None,
+        status_code=None,
+        text=None,
+    ):
+        if requests_resp is not None:
+            status_code = status_code or requests_resp.status_code
+            text = text or requests_resp.text
+        self.status_code = status_code
+        self.text = text
         self._raw_resp = requests_resp
 
     def raise_for_status(self):

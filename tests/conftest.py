@@ -104,6 +104,11 @@ def mock_test_client(public_key):
     ):
         return request.user
 
+    @app.get("/isauth_authenticated")
+    @authorize()
+    async def get_isauth_authenticated(request: Request):
+        return {"authenticated": True}
+
     @app.get("/isauth_impersonation_all_roles")
     @authorize("user_impersonation", ["Admin", "Contributor"])
     async def get_isauth_with_impersonation_and_all_roles(
