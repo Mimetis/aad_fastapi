@@ -22,7 +22,9 @@ def authorize(
 ):
     """
     Decorator to authorize a route
-    :param scopes: list of scopes (if not set, only an authenticated user is required)
+    :param scopes: list of scopes. If not set, any token accepted by AadBearerBackend
+        is authorized (it carries a scope or an app role, unless
+        allow_tokens_without_permissions is enabled)
     :param roles: list of roles to validate
     :param role_requirement: role requirement (RoleRequirement.ALL or RoleRequirement.ANY)
     """
@@ -65,7 +67,12 @@ def authorize(
 def oauth2_scheme(
     options: Optional[AzureAdSettings] = None, env_path: Optional[str] = None, **kwargs
 ):
-    """get the OAuth2 schema used for API Authentication"""
+    """get the OAuth2 schema used for API Authentication
+
+    It documents the OAuth2 flow in OpenAPI and requires an Authorization header.
+    The token itself is validated by AadBearerBackend: use @authorize to require
+    specific scopes or roles.
+    """
 
     if options is None:
         # _env_file is a pydantic-settings runtime argument, unknown to pyright

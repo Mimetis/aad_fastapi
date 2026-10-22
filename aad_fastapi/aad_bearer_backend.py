@@ -9,7 +9,7 @@ from starlette.authentication import (
 from starlette.requests import Request
 
 from .aad_auth_error import AuthError
-from .aad_helpers import _validate_claims, ensure_user_from_token
+from .aad_helpers import ensure_user_from_token
 from .aad_options import AzureAdSettings
 from .aad_token import AuthToken
 
@@ -48,20 +48,11 @@ class AadBearerBackend(AuthenticationBackend):
             # get token from header
             auth_token = self.get_token_from_header(request)
 
-            # decode token
+            # decode and validate the token
             user = ensure_user_from_token(
                 auth_token, public_key=self.public_key, options=self.options
             )
 
-            if user.claims is None:
-                raise AuthError("invalid_token", "No claims found in token")
-
-            # validate the claims
-            _validate_claims(
-                user.claims,
-                audiences=self.options.audiences,
-                issuers=self.options.get_available_issuers(),
-            )
             return AuthCredentials(user.scopes), user
 
         except Exception as ex:

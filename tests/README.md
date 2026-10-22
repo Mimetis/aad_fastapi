@@ -14,6 +14,8 @@ def test_decode_token_with_keys_url(private_key, jwks_endpoint):
     claims = _decode_token(access_token, keys_url=jwks_endpoint["url"])
 ```
 
+The `instance_discovery` fixture (applied to every test) mocks the Azure AD instance discovery endpoint, used to compute the valid issuers. The tests don't need any network access.
+
 ## Access Token
 
 All tokens acquired from Azure AD are mocked using a local certificate (private and public keys)

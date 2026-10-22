@@ -103,6 +103,22 @@ async def user_with_scope_and_roles_any(
 ```
 > **NOTE:** `RoleRequirement.ALL` is the default behavior and does not need to be specified.
 
+### Token validation
+
+`AadBearerBackend` rejects any request carrying an invalid bearer token. A token is valid when:
+
+- its signature is verified (`RS256` only), using the signing keys of your `AUTHORITY`.
+- it is not expired: `exp`, `nbf` and `iat` are checked, and `exp`, `iat`, `iss` and `aud` are required.
+- its audience (`aud`) is your API: `api://{CLIENT_ID}`, `{CLIENT_ID}` or `https://{DOMAIN}/{CLIENT_ID}`.
+- its issuer (`iss`) is your tenant (`TENANT_ID`), on any host of your `AUTHORITY`'s cloud (ex: `login.microsoftonline.com`, `login.windows.net`, `sts.windows.net`). If the issuers can't be computed, every token is rejected: set `aad_issuers_list` to configure them explicitly.
+- it carries a delegated permission (`scp` claim) or an app role (`roles` claim).
+
+The last rule rejects app-only tokens without any granted permission: Azure AD issues such tokens to **any** application of your tenant, unless **Assignment required** is enabled on the Enterprise Application of your API. If you authorize the callers yourself, you can accept these tokens with `ALLOW_TOKENS_WITHOUT_PERMISSIONS=true` (or `allow_tokens_without_permissions=True` on `AzureAdSettings`).
+
+> **NOTE:** `Depends(oauth2_scheme())` only requires a valid token for your API: use `@authorize` to require specific scopes or roles.
+
+`ensure_user_from_token` applies the same validations. With `validate=False`, it validates **nothing**: never use it to authorize a call.
+
 ## Register your application within your Azure AD tenant
 
 There are two applications to register:

@@ -5,17 +5,19 @@ import sys
 import urllib.request
 
 import pytest
+import requests
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import FastAPI
 from fastapi.param_functions import Depends
 from fastapi.testclient import TestClient
-from helpers import TEST_KEY_ID
+from helpers import INSTANCE_DISCOVERY, TEST_KEY_ID
 from jwt.algorithms import RSAAlgorithm
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
 from aad_fastapi import AadBearerBackend, AadDiscoverKey, authorize, oauth2_scheme
+from aad_fastapi.aad_options import INSTANCE_DISCOVERY_URL
 from aad_fastapi.roles.role_requirement import RoleRequirement
 
 os.environ["CLIENT_ID"] = "01010101-aaaa-bbbb-acdf-020202020202"
@@ -33,6 +35,28 @@ def run_test_in_temporary_directory(request):
     sys.path.insert(0, str(tmpdir))
     with tmpdir.as_cwd():
         yield
+
+
+@pytest.fixture(autouse=True)
+def instance_discovery(monkeypatch: pytest.MonkeyPatch):
+    """Mock the Azure AD instance discovery endpoint, used to compute the issuers.
+
+    Returns the list of the kwargs of each discovery request.
+    """
+    calls = []
+    real_get = requests.get
+
+    def fake_get(url, *args, **kwargs):
+        if url != INSTANCE_DISCOVERY_URL:
+            return real_get(url, *args, **kwargs)
+        calls.append(kwargs)
+        response = requests.Response()
+        response.status_code = 200
+        response._content = json.dumps(INSTANCE_DISCOVERY).encode()
+        return response
+
+    monkeypatch.setattr(requests, "get", fake_get)
+    return calls
 
 
 @pytest.fixture(scope="module")

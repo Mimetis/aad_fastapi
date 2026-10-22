@@ -4,15 +4,28 @@ import warnings
 
 import jwt
 import pytest
-from helpers import gen_payload
+from helpers import TEST_KEY_ID, gen_payload
 
-from aad_fastapi import AadUser, AuthError, AzureAdSettings
+from aad_fastapi import (
+    AadUser,
+    AuthError,
+    AuthToken,
+    AzureAdSettings,
+    ensure_user_from_token,
+)
 from aad_fastapi.aad_helpers import (
     _decode_token,
     _decode_token_without_validating_signature,
     _get_user_from_claims,
     _validate_claims,
 )
+
+OTHER_TENANT_ID = "03030303-aaaa-bbbb-cccc-030303030303"
+
+
+def gen_auth_token(private_key, **kwargs) -> AuthToken:
+    payload = gen_payload(AzureAdSettings(), private_key, **kwargs)
+    return AuthToken(json.loads(payload)["access_token"])
 
 
 def test_decode_token(private_key, public_key):
@@ -261,3 +274,122 @@ def test_get_user_from_claims(private_key, public_key):
 
     assert isinstance(user, AadUser)
     assert user.username == f"John.Doe@{options.domain}"
+
+
+@pytest.mark.parametrize(
+    "validate_kwargs, error",
+    [
+        ({"issuers": []}, jwt.InvalidIssuerError),
+        ({"audiences": []}, jwt.InvalidAudienceError),
+    ],
+)
+def test_validate_claims_rejects_empty_lists(
+    private_key, public_key, validate_kwargs, error
+):
+    """An empty list of valid issuers or audiences must reject the token"""
+
+    payload = gen_payload(AzureAdSettings(), private_key)
+    claims = _decode_token(json.loads(payload)["access_token"], public_key=public_key)
+
+    with pytest.raises(error):
+        _validate_claims(claims, **validate_kwargs)
+
+
+def test_ensure_user_from_token(private_key, public_key):
+    auth_token = gen_auth_token(private_key, scp="user_impersonation")
+
+    user = ensure_user_from_token(auth_token, public_key=public_key)
+
+    assert user.id == "jdoe1"
+    assert user.scopes is not None and "user_impersonation" in user.scopes
+    assert user.auth_token is auth_token
+
+
+@pytest.mark.parametrize(
+    "token_kwargs",
+    [
+        # token issued for another API (ex: an attacker's own app registration)
+        {"aud": "api://another-api"},
+        # token issued by another tenant
+        {"iss": f"https://sts.windows.net/{OTHER_TENANT_ID}/"},
+    ],
+)
+def test_ensure_user_from_token_validates_audience_and_issuer(
+    private_key, public_key, token_kwargs
+):
+    auth_token = gen_auth_token(
+        private_key, scp="user_impersonation", roles=["Admin"], **token_kwargs
+    )
+
+    with pytest.raises(AuthError) as auth_error:
+        ensure_user_from_token(auth_token, public_key=public_key)
+
+    assert auth_error.value.code == "invalid_claim"
+
+
+def test_ensure_user_from_token_requires_exp(private_key, public_key):
+    options = AzureAdSettings()
+    payload = {
+        "iss": f"https://sts.windows.net/{options.tenant_id}/",
+        "aud": f"api://{options.client_id}",
+        "iat": int(time.time()),
+        "oid": "jdoe1",
+        "name": "John Doe",
+        "unique_name": "john.doe@contoso.com",
+        "scp": "user_impersonation",
+    }
+    token = jwt.encode(
+        payload, private_key, algorithm="RS256", headers={"kid": TEST_KEY_ID}
+    )
+
+    with pytest.raises(AuthError) as auth_error:
+        ensure_user_from_token(AuthToken(token), public_key=public_key)
+
+    assert auth_error.value.code == "missing_claim"
+
+
+def test_ensure_user_from_token_validates_access_token_not_id_token(
+    private_key, public_key
+):
+    """A valid id_token must not hide an access token issued for another API"""
+
+    access_token = gen_auth_token(private_key, scp="x", aud="api://another-api")
+    id_token = gen_auth_token(private_key, scp="user_impersonation")
+    auth_token = AuthToken(access_token.access_token, id_token=id_token.access_token)
+
+    with pytest.raises(AuthError):
+        ensure_user_from_token(auth_token, public_key=public_key)
+
+
+def test_ensure_user_from_token_rejects_token_without_permissions(
+    private_key, public_key
+):
+    """App-only token without any granted app role (no "roles" nor "scp" claim)"""
+
+    auth_token = gen_auth_token(private_key, use_service_principal=True)
+
+    with pytest.raises(AuthError) as auth_error:
+        ensure_user_from_token(auth_token, public_key=public_key)
+
+    assert auth_error.value.code == "missing_permissions"
+    assert auth_error.value.status_code == 403
+
+
+def test_ensure_user_from_token_accepts_app_token_with_roles(private_key, public_key):
+    auth_token = gen_auth_token(
+        private_key, use_service_principal=True, roles=["Data.Read"]
+    )
+
+    user = ensure_user_from_token(auth_token, public_key=public_key)
+
+    assert user.roles_id == ["Data.Read"]
+    assert user.is_interactive is False
+
+
+def test_ensure_user_from_token_allow_tokens_without_permissions(private_key, public_key):
+    auth_token = gen_auth_token(private_key, use_service_principal=True)
+    options = AzureAdSettings(allow_tokens_without_permissions=True)
+
+    user = ensure_user_from_token(auth_token, public_key=public_key, options=options)
+
+    assert user.is_interactive is False

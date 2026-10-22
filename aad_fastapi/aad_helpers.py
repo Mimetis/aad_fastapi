@@ -14,6 +14,9 @@ from .aad_user import AadUser
 # algorithms prevents "alg" confusion attacks (e.g. "none" or HS256).
 ALGORITHMS = ["RS256"]
 
+# claims always present in an Azure AD access token
+REQUIRED_CLAIMS = ["exp", "iat", "iss", "aud"]
+
 # error codes kept identical to the ones previously raised by authlib.jose
 _ERROR_CODES = {
     jwt.ExpiredSignatureError: "expired_token",
@@ -55,13 +58,9 @@ def _decode_token(
 
         auth_token = AuthToken(auth_token) if isinstance(auth_token, str) else auth_token
 
-        # if id token exists, gets it
-        # in that cicumstances, we are sure we can validate the token
-        token = (
-            auth_token.access_token
-            if auth_token.id_token is None
-            else auth_token.id_token
-        )
+        # the access token is the one authorizing the call: never fall back on the
+        # id_token, which is issued for the client application
+        token = auth_token.access_token
 
         if public_key is not None:
             # public_key can be a PEM string, a cryptography key or a JWK dict
@@ -81,7 +80,10 @@ def _decode_token(
         # signature, exp, nbf and iat are verified here.
         # aud and iss are verified by _validate_claims
         return jwt.decode(
-            token, jwkey, algorithms=ALGORITHMS, options={"verify_aud": False}
+            token,
+            jwkey,
+            algorithms=ALGORITHMS,
+            options={"verify_aud": False, "require": REQUIRED_CLAIMS},
         )
 
     # If the token is coming from Graph, we can't validate the signature
@@ -106,7 +108,11 @@ def _validate_claims(
     audiences: Optional[typing.Union[str, typing.List[str]]] = None,
     issuers: Optional[typing.Union[str, typing.List[str]]] = None,
 ):
-    """Validate a claims."""
+    """Validate a claims.
+
+    When audiences (or issuers) are given, the token must match one of them: an empty
+    list rejects every token, so that a misconfiguration never skips the validation.
+    """
 
     if audiences is not None and isinstance(audiences, str):
         aud_list = [audiences]
@@ -117,7 +123,7 @@ def _validate_claims(
         _require_claim(claims, "aud")
         token_aud = claims["aud"]
         token_aud = token_aud if isinstance(token_aud, list) else [token_aud]
-        if aud_list and not any(aud in token_aud for aud in aud_list):
+        if not any(aud in token_aud for aud in aud_list):
             raise jwt.InvalidAudienceError("Audience doesn't match")
 
     # You can get a list of issuers for the various Azure AD deployments
@@ -137,7 +143,7 @@ def _validate_claims(
 
     if issuers is not None and isinstance(issuers, typing.List):
         _require_claim(claims, "iss")
-        if issuers and claims["iss"] not in issuers:
+        if claims["iss"] not in issuers:
             raise jwt.InvalidIssuerError("Invalid issuer")
 
     # already checked when decoding a signed token, but claims may come from
@@ -149,13 +155,37 @@ def _validate_claims(
         raise jwt.ImmatureSignatureError("The token is not yet valid (nbf)")
 
 
+def _validate_permissions(claims: Dict[str, Any]):
+    """Ensure the token carries a delegated permission (scp) or an app role (roles).
+
+    Azure AD issues app-only tokens without any "roles" claim to any application of
+    the tenant, unless "Assignment required" is enabled on the API: such a token
+    proves the caller's identity, not its right to call the API.
+    """
+    if not claims.get("scp") and not claims.get("roles"):
+        raise AuthError(
+            "missing_permissions",
+            "The token has neither a 'scp' nor a 'roles' claim",
+            status_code=403,
+        )
+
+
 def ensure_user_from_token(
     auth_token: AuthToken,
     validate: bool = True,
     options: Optional[AzureAdSettings] = None,
     env_path: Optional[str] = None,
     **kwargs,
-):
+) -> AadUser:
+    """Get the user from an access token.
+
+    When validate is True (default), the token signature and lifetime, its audience
+    (options.audiences) and issuer (options.get_available_issuers()) are validated,
+    and it must carry a "scp" or "roles" claim (unless
+    options.allow_tokens_without_permissions is set).
+
+    validate=False skips all these validations: never use it to authorize a call.
+    """
     if options is None:
         # _env_file is a pydantic-settings runtime argument, unknown to pyright
         options = AzureAdSettings(_env_file=env_path)  # pyright: ignore[reportCallIssue]
@@ -166,6 +196,17 @@ def ensure_user_from_token(
             keys_url=options.keys_url,
             **kwargs,
         )
+        try:
+            _validate_claims(
+                claims,
+                audiences=options.audiences,
+                issuers=options.get_available_issuers(),
+            )
+        except jwt.PyJWTError as jex:
+            raise _to_auth_error(jex)
+
+        if not options.allow_tokens_without_permissions:
+            _validate_permissions(claims)
     else:
         claims = _decode_token_without_validating_signature(auth_token)
 

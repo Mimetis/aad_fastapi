@@ -11,6 +11,32 @@ from aad_fastapi.aad_options import AzureAdSettings
 # kid used to sign all the generated test tokens
 TEST_KEY_ID = "nOo3ZDrODXEK1jKWhXslHR_KXEg"
 
+# Extract of the Azure AD instance discovery response (INSTANCE_DISCOVERY_URL)
+INSTANCE_DISCOVERY = {
+    "tenant_discovery_endpoint": "https://login.microsoftonline.com/common/v2.0/"
+    ".well-known/openid-configuration",
+    "api-version": "1.1",
+    "metadata": [
+        {
+            "preferred_network": "login.microsoftonline.com",
+            "aliases": [
+                "login.microsoftonline.com",
+                "login.windows.net",
+                "login.microsoft.com",
+                "sts.windows.net",
+            ],
+        },
+        {
+            "preferred_network": "login.partner.microsoftonline.cn",
+            "aliases": ["login.partner.microsoftonline.cn", "login.chinacloudapi.cn"],
+        },
+        {
+            "preferred_network": "login.microsoftonline.us",
+            "aliases": ["login.microsoftonline.us", "login.usgovcloudapi.net"],
+        },
+    ],
+}
+
 
 def gen_client_info(options: AzureAdSettings, **kwargs):
     """
@@ -56,6 +82,7 @@ def gen_access_token(
     iss = kwargs.pop("iss", f"https://sts.windows.net/{tenant_id}/")
     aud = kwargs.pop("aud", f"https://{domain}/{client_id}")
     scp = kwargs.pop("scp", None)
+    roles = kwargs.pop("roles", None)
 
     # Generate payload without user information
     payload = {
@@ -69,12 +96,15 @@ def gen_access_token(
         "tid": tid,
     }
 
+    # app roles can be granted to users and to applications (service principals)
+    if roles is not None:
+        payload["roles"] = roles
+
     # Generate user payload if token is issued from a user authentication
     if not use_service_principal:
         family_name = kwargs.pop("family_name", "Doe")
         given_name = kwargs.pop("given_name", "John")
         name = f"{given_name} {family_name}"
-        roles = kwargs.pop("roles", None)
         email = kwargs.pop("email", f"{given_name}.{family_name}@{domain}")
 
         payload["unique_name"] = email
@@ -95,9 +125,6 @@ def gen_access_token(
             scp = new_scp
 
             payload["scp"] = scp
-
-        if roles is not None:
-            payload["roles"] = roles
 
     header = {
         "alg": "RS256",
