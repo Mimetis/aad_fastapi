@@ -64,7 +64,7 @@ First of all, be sure to execute the commands from the root directory.
 Install the python modules required
 
 ``` bash
-pip install -r /sample/requirements.txt
+pip install -r sample/requirements.txt
 ```
 
 You can launch web api directly from IDE, or using the command line:

@@ -12,6 +12,10 @@ To install with `pip`:
 > python -m pip install aad_fastapi
 ```
 
+You also need an ASGI server to run your application, like [uvicorn](https://www.uvicorn.org/): `python -m pip install "uvicorn[standard]"`
+
+> **Upgrading from 1.x**: version 2.0 fixes security issues and validates the tokens more strictly. See the [2.0.0 release notes](https://github.com/Mimetis/aad_fastapi/blob/master/.github/release_notes/2.0.0.md) before upgrading.
+
 ## Usage
 
 Once configured in Azure AD (see sections below), just add an **authentication middleware** with the `AadBearerBackend`:

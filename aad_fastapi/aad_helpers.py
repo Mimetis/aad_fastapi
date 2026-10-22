@@ -36,7 +36,7 @@ def _to_auth_error(ex: jwt.PyJWTError) -> AuthError:
 
 
 def _decode_token_without_validating_signature(
-    auth_token: typing.Union[AuthToken, str]
+    auth_token: typing.Union[AuthToken, str],
 ) -> Dict[str, Any]:
     auth_token = AuthToken(auth_token) if isinstance(auth_token, str) else auth_token
 

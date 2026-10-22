@@ -1,4 +1,8 @@
 include LICENSE
 include HISTORY.md
+include requirements.txt
+include requirements-test.txt
 graft tests
 graft aad_fastapi
+global-exclude __pycache__
+global-exclude *.py[cod]

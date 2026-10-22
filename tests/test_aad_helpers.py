@@ -115,6 +115,10 @@ def test_decode_token_without_validating_signature(private_key):
 
     with warnings.catch_warnings():
         warnings.simplefilter("error")
+        # aiohttp >= 3.14 deprecates BasicAuth, the AuthToken base class
+        warnings.filterwarnings(
+            "ignore", message="BasicAuth is deprecated", category=DeprecationWarning
+        )
         claims = _decode_token_without_validating_signature(access_token)
 
     assert claims["oid"] == "jdoe1"

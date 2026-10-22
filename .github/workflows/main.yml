@@ -1,10 +1,6 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [master]
   pull_request:
@@ -13,82 +9,52 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   linter:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [3.9]
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
       - name: Install project
         run: make install
       - name: Run linter
         run: make lint
 
-  tests_linux:
+  tests:
     needs: linter
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
         os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          # oldest and newest supported versions on macOS and Windows
+          - os: macos-latest
+            python-version: "3.9"
+          - os: macos-latest
+            python-version: "3.14"
+          - os: windows-latest
+            python-version: "3.9"
+          - os: windows-latest
+            python-version: "3.14"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install project
-        run: make install
+        run: python -m pip install -e ".[test]"
       - name: Run tests
-        run: make test
-      - name: "Upload coverage to Codecov"
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
-        uses: codecov/codecov-action@v3
-        # with:
-        #   fail_ci_if_error: true
-
-  tests_mac:
-    needs: linter
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [3.7, 3.8, 3.9]
-        os: [macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+        run: python -m pytest --cov=aad_fastapi --cov-report=xml -l --tb=short tests/
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install project
-        run: make install
-      - name: Run tests
-        run: make test
-
-  tests_win:
-    needs: linter
-
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [3.7, 3.8, 3.9]
-        os: [windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Pip
-        run: c:\hostedtoolcache\windows\python\3.7.9\x64\python.exe -m pip install --upgrade pip
-      - name: Install project
-        run: pip install -e .[test]
-      - name: run tests
-        run: make test
+          files: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}

@@ -95,8 +95,11 @@ This project uses [semantic versioning](https://semver.org/) and tags releases w
 Every time a new tag is created and pushed to the remote repo, github actions will
 automatically create a new release on github and trigger a release on PyPI.
 
-For this to work you need to setup a secret called `PIPY_API_TOKEN` on the project settings>secrets, 
-this token can be generated on [pypi.org](https://pypi.org/account/).
+The package is published with [PyPI trusted publishing](https://docs.pypi.org/trusted-publishers/): no API token is stored in the repository. It requires a one-time setup on [pypi.org](https://pypi.org/manage/project/aad_fastapi/settings/publishing/), adding a GitHub publisher with:
+- Owner: `Mimetis`
+- Repository: `aad_fastapi`
+- Workflow name: `release.yml`
+- Environment name: `pypi`
 
 To trigger a new release all you need to do is.
 
@@ -104,6 +107,7 @@ To trigger a new release all you need to do is.
     * Make your changes following the steps described above.
     * Commit your changes following the [conventional git commit messages](https://www.conventionalcommits.org/en/v1.0.0/).
 2. Run the tests to ensure everything is working.
+3. Optionally, write the release notes in `.github/release_notes/X.Y.Z.md`: they are added on top of the commits list, in the github release.
 4. Run `make release` to create a new tag and push it to the remote repo.
 
 the `make release` will ask you the version number to create the tag, ex: type `0.1.1` when you are asked.

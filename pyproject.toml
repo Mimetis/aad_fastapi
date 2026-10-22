@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aad_fastapi"
+description = "aad_fastapi middleware backend helper for bearer verification with FastAPI and Azure AD"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [
+    { name = "Sébastien Pertus", email = "sebastien.pertus@gmail.com" },
+    { name = "Dor Lugasi-Gal", email = "dorlugasigal@gmail.com" },
+]
+keywords = ["python"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
+]
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/Mimetis/aad_fastapi"
+"Bug Tracker" = "https://github.com/Mimetis/aad_fastapi/issues"
+
+[tool.setuptools.dynamic]
+version = { file = "aad_fastapi/VERSION" }
+dependencies = { file = ["requirements.txt"] }
+optional-dependencies.test = { file = ["requirements-test.txt"] }
+
+[tool.setuptools.packages.find]
+include = ["aad_fastapi*"]
+
+[tool.setuptools.package-data]
+aad_fastapi = ["VERSION", "py.typed"]

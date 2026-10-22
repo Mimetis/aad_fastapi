@@ -3,11 +3,11 @@ import json
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from helpers import gen_payload
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 
 from aad_fastapi import AadBearerBackend, AzureAdSettings, authorize
-from tests.helpers import gen_payload
 
 
 @pytest.mark.parametrize(

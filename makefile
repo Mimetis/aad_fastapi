@@ -23,15 +23,15 @@ install:          ## Install the project in dev mode.
 
 .PHONY: fmt
 fmt:              ## Format code using black & isort.
-	$(ENV_PREFIX)isort aad_fastapi/
-	$(ENV_PREFIX)black -l 90 aad_fastapi/
-	$(ENV_PREFIX)black -l 90 tests/
+	$(ENV_PREFIX)python -m isort aad_fastapi/
+	$(ENV_PREFIX)python -m black -l 90 aad_fastapi/
+	$(ENV_PREFIX)python -m black -l 90 tests/
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)flake8 --max-line-length 90 aad_fastapi/
-	$(ENV_PREFIX)black -l 90 --check aad_fastapi/
-	$(ENV_PREFIX)black -l 90 --check tests/
+	$(ENV_PREFIX)python -m flake8 --max-line-length 90 aad_fastapi/
+	$(ENV_PREFIX)python -m black -l 90 --check aad_fastapi/
+	$(ENV_PREFIX)python -m black -l 90 --check tests/
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.
